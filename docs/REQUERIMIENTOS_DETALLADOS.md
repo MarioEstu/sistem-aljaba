@@ -4,31 +4,40 @@
 
 ### 1.1 Módulo de Autenticación y Gestión de Usuarios
 
-#### RF-AUTH-01: Registro de Usuarios Admin
-**Descripción:** El sistema debe permitir el registro de usuarios administradores.
+#### RF-AUTH-01: Creación de Usuarios (Admin y Guest)
+**Descripción:** El sistema debe permitir al Administrador crear cuentas de usuario para ambos roles.
 
-**Entradas:**
+**Creación de usuario Admin:**
+
+Entradas:
 - Nombre completo
-- Email (único en el sistema)
+- Nombre de usuario o email (único en el sistema)
 - Contraseña (mínimo 8 caracteres)
 - Confirmación de contraseña
 
+**Creación de usuario Guest (realizada por Admin):**
+
+Entradas:
+- Nombre completo del empleado
+- Nombre de usuario (único en el sistema)
+- Contraseña inicial
+- Rol: Guest
+
 **Proceso:**
-1. Validar formato de email
-2. Verificar que el email no esté registrado
-3. Validar fuerza de contraseña
-4. Encriptar contraseña con bcrypt
-5. Crear usuario con rol Admin
-6. Enviar email de confirmación (opcional)
+1. Validar que el nombre de usuario no esté registrado
+2. Validar fuerza de contraseña
+3. Encriptar contraseña con bcrypt
+4. Crear usuario con el rol correspondiente
 
 **Salidas:**
 - Usuario creado exitosamente
-- Token JWT de sesión
 
 **Reglas de Negocio:**
-- Solo puede haber usuarios Admin (Guest se crean por invitación)
-- Email debe ser único
+- El Admin crea las cuentas Guest para los empleados ruteros
+- No existe auto-registro; solo el Admin puede crear cuentas
+- Nombre de usuario debe ser único
 - Contraseña debe tener al menos: 8 caracteres, 1 mayúscula, 1 minúscula, 1 número
+- El Admin puede desactivar cuentas Guest en cualquier momento
 
 ---
 
@@ -58,12 +67,21 @@
 #### RF-AUTH-03: Gestión de Roles
 **Descripción:** El sistema debe diferenciar entre dos tipos de usuarios.
 
+**Definición de usuarios Guest:**
+Los usuarios Guest son los empleados ruteros de Aljaba S.A. Su función es mostrar o enviar los catálogos de la empresa a los clientes. Cuentan con usuario y contraseña propios, acceso permanente al sistema sin fechas de expiración, y pueden ver y descargar únicamente los catálogos que el Admin haya habilitado para visualización.
+
 **Roles:**
 
-| Rol | Permisos |
-|-----|----------|
-| **Admin** | - Acceso total al sistema<br>- Gestión de productos<br>- Edición de imágenes<br>- Creación de catálogos<br>- Generación de PDF<br>- Invitar usuarios Guest |
-| **Guest** | - Visualizar catálogos compartidos<br>- Descargar PDF de catálogos permitidos<br>- Visualizar galería de imágenes compartidas |
+| Rol | Descripción | Permisos |
+|-----|-------------|----------|
+| **Admin** | Personal de oficina de Aljaba | - Acceso total al sistema<br>- Gestión de productos<br>- Carga y edición de imágenes<br>- Creación de catálogos<br>- Generación de PDF<br>- Habilitar/deshabilitar visibilidad de catálogos para Guests<br>- Crear y gestionar cuentas Guest<br>- Gestión de categorías y categorías padre |
+| **Guest** | Empleados ruteros de Aljaba | - Iniciar sesión con usuario y contraseña<br>- Visualizar catálogos habilitados por el Admin<br>- Descargar PDF de catálogos habilitados<br>- Sin acceso a gestión de productos ni imágenes |
+
+**Reglas de Negocio:**
+- El Admin no envía enlaces individuales a los Guests; en su lugar habilita o deshabilita la visibilidad de un catálogo para todos los Guests
+- Una vez habilitado, todos los Guests pueden ver y descargar ese catálogo
+- Los Guests no tienen límite de tiempo para acceder al sistema
+- El Admin puede crear, editar y desactivar cuentas Guest desde el panel de administración
 
 ---
 
@@ -74,14 +92,16 @@
 
 **Estructura CSV Obligatoria:**
 ```
-Name,code,description,category,price1,price2,price3,price4,price5,price6,image,Stock Quality
+Name,code,description,category,price1,price2,price3,price4,price5,price6,Stock Quality
 ```
+
+**Nota importante:** La columna `image` ha sido eliminada del CSV. La vinculación de imágenes a productos se realiza automáticamente por coincidencia de nombre de archivo con el campo `Name` del producto. Ver RF-IMG-04 para el detalle de este proceso.
 
 **Campos del CSV:**
 
 | Campo | Tipo | Obligatorio | Descripción |
 |-------|------|-------------|-------------|
-| Name | String | Sí | Nombre del producto |
+| Name | String | Sí | Nombre del producto (debe coincidir con el nombre del archivo de imagen ya subido) |
 | code | String | Sí | Código único del producto |
 | description | Text | Sí | Descripción del producto |
 | category | String | Sí | Categoría del producto |
@@ -91,29 +111,30 @@ Name,code,description,category,price1,price2,price3,price4,price5,price6,image,S
 | price4 | Decimal | No | Precio cantidad 4 |
 | price5 | Decimal | No | Precio cantidad 5 |
 | price6 | Decimal | No | Precio cantidad 6 |
-| image | URL | Sí | URL o path de la imagen |
 | Stock Quality | Integer | Sí | Cantidad en stock |
 
 **Proceso de Importación:**
 1. Validar formato del archivo (debe ser .csv)
-2. Validar estructura (columnas coinciden)
+2. Validar estructura (columnas coinciden, 11 columnas)
 3. Validar datos fila por fila:
    - Campos obligatorios presentes
    - Tipos de datos correctos
    - Códigos únicos
-4. Mostrar reporte de validación (errores y advertencias)
-5. Permitir corregir o continuar
-6. Importar productos válidos
-7. Asociar categorías automáticamente
+4. Para cada producto, buscar en la galería de imágenes del sistema una imagen cuyo nombre coincida exactamente con el campo `Name`
+5. Mostrar reporte de validación (errores, advertencias e imágenes no encontradas)
+6. Permitir corregir o continuar
+7. Importar productos válidos
+8. Asociar categorías automáticamente
 
 **Salidas:**
-- Reporte de importación (productos importados, errores, advertencias)
+- Reporte de importación (productos importados, errores, advertencias, imágenes no vinculadas)
 - Productos creados en base de datos
 
 **Reglas de Negocio:**
+- Las imágenes deben estar subidas al sistema ANTES de importar el CSV
+- Si no se encuentra imagen con el mismo `Name`, el producto se importa con imagen en blanco y se muestra advertencia
 - Si el código ya existe, preguntar si actualizar o omitir
 - Categorías nuevas se crean automáticamente
-- Imágenes externas se descargan y almacenan localmente
 
 ---
 
@@ -221,11 +242,27 @@ Name,code,description,category,price1,price2,price3,price4,price5,price6,image,S
 
 ---
 
-#### RF-PROD-08: Categorías y Subcategorías
-**Descripción:** Sistema jerárquico de organización.
+#### RF-PROD-08: Categorías, Subcategorías y Categorías Padre
+**Descripción:** Sistema de organización jerárquica de dos niveles: categorías padre que agrupan categorías, y categorías que agrupan productos.
 
-**Características:**
-- Árbol de categorías ilimitado (niveles anidados)
+**Nivel 1: Categorías Padre**
+Las categorías padre son agrupaciones libres que el Admin puede crear para reunir múltiples categorías bajo un nombre común. Son de total disposición del administrador en cuanto a nombre y composición.
+
+**Características de Categorías Padre:**
+- El Admin crea categorías padre con el nombre que decida
+- El Admin elige qué categorías incluir en cada categoría padre
+- Una categoría puede pertenecer a una sola categoría padre a la vez
+- El Admin puede en cualquier momento:
+  - Renombrar una categoría padre
+  - Agregar categorías a una categoría padre
+  - Quitar categorías de una categoría padre
+  - Eliminar una categoría padre (las categorías que contenía quedan sin categoría padre)
+
+**Nivel 2: Categorías de Productos**
+Son las categorías directas de los productos (las que llegan del CSV o se crean manualmente). Pueden estar agrupadas bajo una categoría padre o existir independientemente.
+
+**Características de Categorías de Productos:**
+- Árbol jerárquico (categorías y subcategorías)
 - Drag & drop para reorganizar
 - Renombrar categorías
 - Mover productos entre categorías
@@ -233,39 +270,59 @@ Name,code,description,category,price1,price2,price3,price4,price5,price6,image,S
 
 **Ejemplo de Estructura:**
 ```
-Iluminación
-├── Iluminación Interior
-│   ├── Bombillas LED
-│   ├── Lámparas de Techo
-│   └── Focos Empotrados
-└── Iluminación Exterior
-    ├── Reflectores
-    └── Faroles
+[Categoria Padre] LP - Lamparas y Plomeria
+  ├── Iluminacion        (categoria)
+  │   ├── Bombillas LED  (subcategoria)
+  │   └── Reflectores    (subcategoria)
+  └── Plomeria           (categoria)
+      ├── Tuberias       (subcategoria)
+      └── Llaves         (subcategoria)
+
+[Categoria Padre] FA - Ferreteria y Automotriz
+  ├── Ferreteria         (categoria)
+  └── Automotriz         (categoria)
+
+[Sin categoria padre]
+  └── Papeleria          (categoria)
 ```
+
+**Uso en catálogos:**
+El Admin puede seleccionar productos para un catálogo filtrando por categoría padre, por categoría, o por subcategoría.
+
+**Reglas de Negocio:**
+- Los nombres de categorías padre son libres y definidos por el Admin
+- Una categoría puede estar sin categoría padre asignada
+- Eliminar una categoría padre no elimina las categorías que agrupaba
 
 ---
 
 ### 1.3 Módulo de Gestión de Imágenes
 
 #### RF-IMG-01: Carga de Imágenes
-**Descripción:** Subir imágenes al sistema.
+**Descripción:** Subir imágenes al sistema antes de importar el CSV.
 
 **Formatos Soportados:** JPG, JPEG, PNG, WEBP
 
+**Convención de Nombres Obligatoria:**
+El nombre del archivo de imagen debe ser exactamente igual al valor del campo `Name` del producto en el CSV. Esta es la clave de vinculación automática.
+
+- Ejemplo: si el producto tiene `Name = 001lampara`, el archivo de imagen debe llamarse `001lampara.jpg` (o `.png`, `.webp`)
+- La extension del archivo es ignorada para la comparacion; solo importa el nombre sin extension
+
 **Proceso:**
-1. Validar formato y tamaño (máx 10MB)
-2. Generar nombre único (UUID)
+1. Validar formato y tamaño (max 10MB)
+2. Conservar el nombre original del archivo (sin generar UUID, ya que el nombre es clave de vinculacion)
 3. Optimizar imagen automáticamente:
    - Redimensionar si > 2000px en cualquier lado
    - Comprimir con calidad 85%
    - Generar thumbnail (300x300px)
 4. Subir a almacenamiento en nube
-5. Guardar metadata en base de datos
+5. Guardar metadata en base de datos incluyendo el nombre original del archivo
 
 **Salidas:**
-- URL pública de la imagen
+- URL de la imagen almacenada
 - URL del thumbnail
-- Metadata (tamaño, dimensiones, formato)
+- Metadata (nombre original, tamaño, dimensiones, formato)
 
 ---
 
@@ -274,11 +331,12 @@ Iluminación
 
 **Características:**
 - Grid responsive de thumbnails
-- Búsqueda por nombre
+- Búsqueda por nombre de archivo
 - Filtro por fecha de carga
 - Vista previa al hacer hover
 - Selección múltiple
-- Información de uso (en cuántos productos está)
+- Información de uso (vinculada a producto / sin vincular)
+- Indicador visual de imágenes que aún no tienen producto asociado
 
 ---
 
@@ -320,6 +378,28 @@ Iluminación
 - Historial de cambios (undo/redo hasta 20 acciones)
 - Exportar en PNG o JPG
 - Guardar como nueva versión (no sobreescribir original)
+- Al guardar version editada, el nombre se mantiene para conservar la vinculacion con el producto
+
+---
+
+#### RF-IMG-04: Vinculación Automática de Imágenes a Productos
+**Descripción:** El sistema vincula automáticamente imágenes a productos comparando el nombre del archivo de imagen con el campo `Name` del producto.
+
+**Proceso de Vinculación (ocurre al importar CSV):**
+1. Para cada fila del CSV, el sistema toma el valor del campo `Name`
+2. Busca en la galería de imágenes del sistema un archivo cuyo nombre (sin extensión) coincida exactamente con ese `Name`
+3. Si encuentra coincidencia, vincula la imagen al producto
+4. Si no encuentra coincidencia, importa el producto sin imagen y registra la advertencia
+
+**Proceso de Re-vinculación (operación manual):**
+- El Admin puede desde la vista de un producto sin imagen, buscar y asignar manualmente una imagen de la galería
+- También puede subir una nueva imagen directamente desde el formulario del producto
+
+**Reglas de Negocio:**
+- La comparación de nombres es exacta y sensible a mayúsculas/minúsculas
+- Solo se acepta un archivo de imagen por nombre (si hay duplicados, el sistema alerta al Admin)
+- Las imágenes deben cargarse al sistema antes de importar el CSV para garantizar la vinculación automática
+- Si se sube una imagen con el mismo nombre que un producto existente sin imagen, el sistema la vincula automáticamente
 
 ---
 
@@ -441,40 +521,64 @@ Iluminación
 
 ---
 
-### 1.6 Módulo de Compartir (Guest Access)
+### 1.6 Módulo de Acceso Guest (Empleados Ruteros)
 
-#### RF-GUEST-01: Generar Enlace de Acceso
-**Descripción:** Crear enlace público para compartir catálogo.
+#### RF-GUEST-01: Habilitación de Catálogos para Guests
+**Descripción:** El Admin controla qué catálogos son visibles para todos los usuarios Guest del sistema.
+
+**Proceso:**
+1. Admin accede a la lista de catálogos
+2. Admin activa o desactiva el acceso Guest por catálogo mediante un toggle o switch
+3. Al activar, el catálogo queda visible para todos los usuarios Guest autenticados
+4. Al desactivar, el catálogo deja de aparecer en la vista Guest inmediatamente
 
 **Entradas:**
-- Catálogo a compartir
-- Permisos:
-  - Solo visualización
-  - Visualización + descarga PDF
-  - Visualización + descarga de imágenes individuales
-- Fecha de expiración (opcional)
-- Contraseña (opcional)
+- Catálogo a habilitar/deshabilitar
+- Estado deseado: habilitado / deshabilitado
 
 **Salidas:**
-- URL única e irrepetible (token UUID)
-- QR code del enlace (opcional)
+- Estado del catálogo actualizado
+- Catálogo visible u oculto en la vista Guest
 
 **Reglas de Negocio:**
-- Enlace expira después de la fecha configurada
-- Pueden existir múltiples enlaces para el mismo catálogo
-- Admin puede revocar enlaces en cualquier momento
+- No se generan enlaces individuales; el acceso es para todos los Guests autenticados
+- No hay fechas de expiración; el acceso se mantiene mientras el Admin no lo deshabilite
+- El Admin puede habilitar múltiples catálogos simultáneamente
+- La acción es instantánea; no requiere regenerar el catálogo ni el PDF
 
 ---
 
-#### RF-GUEST-02: Vista de Guest
-**Descripción:** Interfaz simplificada para usuarios invitados.
+#### RF-GUEST-02: Gestión de Cuentas Guest
+**Descripción:** El Admin crea y administra las cuentas de los empleados ruteros (Guests).
 
-**Características:**
-- Sin necesidad de registro
-- Ingreso directo mediante URL compartida
-- Vista de catálogo con scroll infinito
-- Botón de descarga PDF (si tiene permiso)
-- Marca de agua o logo de Aljaba en vistas Guest
+**Funcionalidades:**
+- Crear cuenta Guest: nombre, nombre de usuario, contraseña inicial
+- Ver lista de todos los Guests registrados
+- Editar nombre o nombre de usuario de un Guest
+- Restablecer contraseña de un Guest
+- Activar o desactivar cuenta de un Guest
+
+**Reglas de Negocio:**
+- Solo el Admin puede crear, editar o desactivar cuentas Guest
+- Un Guest desactivado no puede iniciar sesión
+- No existe auto-registro para Guests
+
+---
+
+#### RF-GUEST-03: Vista del Empleado Rutero (Guest)
+**Descripción:** Interfaz del sistema para el usuario Guest.
+
+**Flujo de Acceso:**
+1. Guest ingresa al sistema con su nombre de usuario y contraseña
+2. El sistema autentica y redirige al panel Guest
+3. Guest ve únicamente los catálogos que el Admin ha habilitado
+
+**Características de la Vista Guest:**
+- Lista de catálogos habilitados con nombre, descripción e imagen de portada
+- Botón de descarga de PDF para cada catálogo habilitado
+- Interfaz limpia y simple, orientada a uso rápido en campo
+- Responsive: funciona correctamente en móvil y tablet
+- Sin acceso a módulos de administración (productos, imágenes, categorías, configuración)
 
 ---
 
@@ -633,31 +737,30 @@ Iluminación
 
 ---
 
-### Historia 4: Compartir Catálogo con Cliente
+### Historia 4: Habilitar Catálogo para Empleados Ruteros
 **Como** administrador de Aljaba  
-**Quiero** generar un enlace de mi catálogo  
-**Para** que mis clientes lo vean sin necesidad de cuenta  
+**Quiero** habilitar un catálogo para que mis empleados ruteros lo vean  
+**Para** que puedan mostrarlo o enviarlo a los clientes sin que yo deba hacer nada mas  
 
 **Criterios de Aceptación:**
-- Puedo generar enlace único por catálogo
-- Puedo configurar permisos (solo ver o descargar)
-- Puedo configurar fecha de expiración
-- Cliente accede sin registro
-- Puedo revocar enlace en cualquier momento
+- Puedo activar o desactivar un catálogo para Guests con un toggle
+- Al activar, todos los Guests autenticados ven el catálogo inmediatamente
+- Al desactivar, el catálogo desaparece de la vista Guest inmediatamente
+- No necesito generar ni enviar enlaces
 
 ---
 
-### Historia 5: Visualizar Catálogo como Guest
-**Como** cliente de Aljaba (Guest)  
-**Quiero** ver el catálogo compartido conmigo  
-**Para** conocer los productos disponibles y sus precios  
+### Historia 5: Acceder al Sistema como Empleado Rutero (Guest)
+**Como** empleado rutero de Aljaba (Guest)  
+**Quiero** iniciar sesión en el sistema con mi usuario y contraseña  
+**Para** poder ver y descargar los catálogos en mi dispositivo y mostrárselos a los clientes  
 
 **Criterios de Aceptación:**
-- Accedo mediante enlace sin registro
-- Veo productos con imágenes y precios
-- Puedo descargar PDF si tengo permiso
-- Interfaz es clara y profesional
-- Funciona en mi móvil
+- Inicio sesión con usuario y contraseña asignados por el Admin
+- Solo veo los catálogos que el Admin ha habilitado para Guests
+- Puedo descargar el PDF de cada catálogo habilitado
+- La interfaz funciona bien en mi celular o tablet
+- Mi acceso no tiene fecha de expiración
 
 ---
 
@@ -691,16 +794,17 @@ Iluminación
 
 ---
 
-### CU-03: Visualizar Catálogo Compartido (Guest)
-**Actor:** Cliente (Guest)  
-**Precondición:** Admin ha generado enlace compartido  
+### CU-03: Acceder a Catálogos como Empleado Rutero (Guest)
+**Actor:** Empleado Rutero (Guest)  
+**Precondición:** Admin ha creado la cuenta Guest y ha habilitado al menos un catálogo  
 **Flujo Principal:**
-1. Guest accede mediante URL compartida
-2. Sistema valida enlace (no expirado, activo)
-3. Guest visualiza catálogo
-4. Guest descarga PDF si tiene permiso
+1. Guest ingresa al sistema con usuario y contraseña
+2. Sistema autentica y redirige al panel Guest
+3. Guest ve la lista de catálogos habilitados por el Admin
+4. Guest selecciona un catálogo para visualizarlo
+5. Guest descarga el PDF del catálogo
 
 ---
 
-**Última actualización:** 14 de febrero de 2026  
+**Última actualización:** 20 de febrero de 2026  
 **Versión:** 1.0

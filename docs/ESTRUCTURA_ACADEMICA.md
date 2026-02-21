@@ -14,14 +14,8 @@
 Sistema Web de Gestión y Generación de Catálogos Digitales para Aljaba S.A.
 
 **Estudiante:**  
-[Tu Nombre Completo]  
-Carné: [Tu Carné]
-
-**Asesor Técnico:**  
-[Nombre del Asesor]
-
-**Fecha de Presentación:**  
-[Mes y Año]
+Mario Estuardo López Rodas  
+Carné: 0900-22-9412
 
 ---
 
