@@ -5,11 +5,11 @@
 **Nombre del Proyecto:** Catalog Aljaba  
 **Empresa Cliente:** Aljaba S.A. - Guatemala  
 **Tipo:** Sistema Web de Gestión de Catálogos Digitales  
-**Estudiante:** [Tu Nombre]  
+**Estudiante:** Mario Estuardo López Rodas 
 **Carrera:** Ingeniería en Sistemas  
 **Fecha de Inicio:** Febrero 2026  
 **Tiempo de Desarrollo:** 5 meses  
-**Fecha Estimada de Entrega:** Julio 2026
+**Fecha Estimada de Entrega:** Junio 2026
 
 ---
 
@@ -120,11 +120,12 @@ Desarrollar un sistema web integral que unifique las funcionalidades de **Catalo
 -  Configuración de márgenes, tamaños, orientación
 -  Descarga directa
 
-#### Módulo de Compartir (Guest Access)
--  Generación de enlaces de acceso
--  Control de permisos por catálogo
--  Visualización de catálogos compartidos
--  Descarga de PDF para guests
+#### Módulo de Guest Access (Empleados Ruteros)
+-  Creación y gestión de cuentas Guest por el Admin
+-  Autenticación de empleados ruteros con usuario y contraseña
+-  Habilitación/deshabilitación de catálogos visibles para todos los Guests
+-  Visualización de catálogos habilitados
+-  Descarga de PDF de catálogos habilitados
 
 ### 3.2 Funcionalidades Excluidas (Fuera del Alcance - Fase 1)
 
@@ -144,7 +145,7 @@ Desarrollar un sistema web integral que unifique las funcionalidades de **Catalo
 
 | ID | Requerimiento | Prioridad |
 |----|---------------|-----------|
-| RF-01 | El sistema debe importar archivos CSV con la estructura: Name, code, description, category, price1-6, image, Stock Quality | **Alta** |
+| RF-01 | El sistema debe importar archivos CSV con la estructura: Name, code, description, category, price1-6, Stock Quality (11 columnas, sin columna image) | **Alta** |
 | RF-02 | El sistema debe validar la estructura del CSV antes de importar | **Alta** |
 | RF-03 | El sistema debe permitir crear, editar y eliminar productos | **Alta** |
 | RF-04 | El sistema debe organizar productos por categorías y subcategorías | **Alta** |
@@ -220,10 +221,8 @@ Este documento es parte de un conjunto de documentación técnica que incluye:
 1. **DOCUMENTO_PROYECTO.md**
 2. **REQUERIMIENTOS_DETALLADOS.md**
 3. **ARQUITECTURA_SISTEMA.md**
-4. **STACK_TECNOLOGICO.md**
-5. **DIAGRAMAS_UML.md**
-6. **PLAN_DESARROLLO.md**
-7. **ANALISIS_COSTOS.md**
+4. **DIAGRAMAS_UML.md**
+5. **ESTRUCTURA_CSV.md**
 
 ---
 

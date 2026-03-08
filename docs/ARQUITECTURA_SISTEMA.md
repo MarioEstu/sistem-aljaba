@@ -293,16 +293,13 @@ catalog_products
   product_id: UUID REFERENCES products(id)
   position: INTEGER (orden en catálogo)
   
--- Tabla de enlaces compartidos (guest access)
-shared_links
+-- Tabla de visibilidad de catálogos para Guests
+catalog_guest_visibility
   id: UUID PRIMARY KEY
-  token: UUID UNIQUE
   catalog_id: UUID REFERENCES catalogs(id)
-  permissions: JSONB (view, download_pdf, download_images)
-  expires_at: TIMESTAMP NULLABLE
-  password_hash: VARCHAR NULLABLE
-  created_by: UUID REFERENCES users(id)
-  created_at: TIMESTAMP
+  enabled: BOOLEAN DEFAULT false
+  updated_by: UUID REFERENCES users(id)
+  updated_at: TIMESTAMP
 ```
 
 ---
@@ -637,9 +634,9 @@ catalog-aljaba/
 - Optimización de rendimiento
 
 ### Fase 7: Guest Access (Semana 18)
-- Sistema de enlaces compartidos
-- Vista de guest
-- Control de permisos
+- Creación y gestión de cuentas Guest
+- Habilitación/deshabilitación de catálogos para Guests
+- Vista de empleado rutero (panel Guest)
 
 ### Fase 8: Testing y Deploy (Semanas 19-20)
 - Testing integral

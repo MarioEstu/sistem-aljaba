@@ -28,7 +28,7 @@
 
 
 1. **[ESTRUCTURA_ACADEMICA.md](ESTRUCTURA_ACADEMICA.md)** 
-   - Índice completo sugerido para Proycto
+   - Índice completo sugerido para Proyecto
    - Capítulo I (Introducción) completamente desarrollado
    - Extensión sugerida por capítulo
    - Formato y estilo académico
@@ -44,7 +44,7 @@
    - Base para Capítulo IV (Diseño)
 
 5. **[diagramas/DIAGRAMAS_UML.md](diagramas/DIAGRAMAS_UML.md)**
-   - Todos los diagramas UML para la Proycto
+   - Todos los diagramas UML para la Proyecto
 
 ---
 
@@ -203,9 +203,9 @@
 
 #### 6. ESTRUCTURA_ACADEMICA.md
 **Audiencia:** Desarrollador presentacion Proyecto  
-**Propósito:** Guía para documento de Proycto  
+**Propósito:** Guía para documento de Proyecto  
 **Contenido:**
-- Índice completo sugerido para Proycto
+- Índice completo sugerido para Proyecto
 - Capítulo I (Introducción) completamente desarrollado
 - Extensión sugerida por capítulo
 - Metodología de desarrollo
@@ -256,7 +256,7 @@ Proyecto de Graduacion Catalog Aljaba/
 │   │   └── DIAGRAMAS_UML.md           # Todos los diagramas UML
 │   │
 │   └── requerimientos/
-│       └── (archivos adicionales)
+│       └── ESTRUCTURA_CSV.md          # Estructura y validación del CSV
 │
 ├── frontend/                          
 ├── backend/                           

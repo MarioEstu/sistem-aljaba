@@ -10,7 +10,7 @@ Sistema web integral para la gestión y generación de catálogos digitales de p
 **Tipo de Proyecto:** Sistema Web de Gestión de Catálogos  
 **Propósito Académico:** Proyecto de Graduación - Ingeniería en Sistemas  
 **Duración Estimada:** 5 meses (20 semanas)  
-**Fecha de Inicio:** Enero 2026  
+**Fecha de Inicio:** Febrero 2026  
 **Fecha de Entrega:** Junio 2026
 
 ---
@@ -26,7 +26,7 @@ Desarrollar un sistema web que unifique las funcionalidades de **Catalog Machine
 3. Almacenamiento en la nube de imágenes
 4. Diseñador visual de catálogos con múltiples layouts
 5. Generación de PDF de alta calidad
-6. Sistema de compartir catálogos con clientes (Guest access)
+6. Sistema de acceso para empleados ruteros (Guest access con autenticación)
 
 ---
 
@@ -148,12 +148,12 @@ docs/
 - Compresión optimizada para web
 - Generación rápida (< 10 seg para 100 productos)
 
-### 6. Módulo de Compartir (Guest Access)
-- Enlaces únicos por catálogo
-- Control de permisos (ver/descargar)
-- Fecha de expiración configurable
-- Protección con contraseña opcional
-- Vista profesional sin registro
+### 6. Módulo de Guest Access (Empleados Ruteros)
+- Cuentas de acceso para empleados ruteros (usuario y contraseña)
+- El Admin habilita o deshabilita catálogos visibles para todos los Guests
+- Visualización de catálogos habilitados por el Admin
+- Descarga de PDF de catálogos habilitados
+- Interfaz simple y responsive para uso en campo
 
 ---
 
@@ -164,7 +164,7 @@ docs/
 |       Concepto       | Solución Actual | Sistema Propuesto |    Ahorro   |
 |----------------------|-----------------|-------------------|-------------|
 | Catalog Machine      |    $120/mes     |         -         |     $120    |
-| Postimages           |    Gratis*      |         -         |      -      |
+| Postimages           |    Gratis (Pérdida de datos)      |         -         |      -      |
 | Canva                |   Uso gratuito  |         -         |      -      |
 | **Hosting App**      |        -        |      $12/mes      |      -      |
 | **Almacenamiento**   |        -        |      $5/mes       |      -      |
@@ -213,7 +213,7 @@ docs/
 | **Fase 4: Editor Avanzado**  | 3 semanas |  9-11   | Editor con capas completo       |
 | **Fase 5: Catálogos**        | 4 semanas |  12-15  | Diseño y layouts                |
 | **Fase 6: PDF**              | 2 semanas |  16-17  | Generación PDF                  |
-| **Fase 7: Guest Access**     | 1 semana  |   18    | Enlaces compartidos             |
+| **Fase 7: Guest Access**     | 1 semana  |   18    | Vista de empleados ruteros      |
 | **Fase 8: Testing y Deploy** | 2 semanas |  19-20  | Sistema en producción           |
 
 **Total: 20 semanas (5 meses)**
@@ -282,19 +282,20 @@ docs/
 -  Carga y edición de imágenes
 -  Creación y diseño de catálogos
 -  Generación de PDFs
--  Generación de enlaces compartidos
+-  Habilitación/deshabilitación de catálogos para Guests
+-  Creación y gestión de cuentas Guest
 -  Configuración del sistema
 
 ### Invitado (Guest)
 **Permisos:**
--  Visualizar catálogos compartidos
--  Descargar PDFs (si se le otorga permiso)
--  No puede editar ni crear contenido
--  No requiere registro
+-  Inicio de sesión con usuario y contraseña propios
+-  Visualizar catálogos habilitados por el Admin
+-  Descargar PDFs de catálogos habilitados
+-  Sin acceso a gestión de productos, imágenes ni configuración
 
 ---
 
-## 🚀 Despliegue
+##  Despliegue
 
 ### Entorno de Producción
 - **URL:** [Por definir]
@@ -316,37 +317,37 @@ docs/
 
 ---
 
-## 📞 Contacto
+##  Contacto
 
 **Estudiante/Desarrollador:**  
-[Tu Nombre]  
-📧 [Tu Email]  
-📱 [Tu Teléfono]  
+Mario Estuardo López Rodas 
+estuardopez2004@gmail.com 
++502 55685491
 
 **Empresa Cliente:**  
 Aljaba S.A.  
-📍 Guatemala  
+ Guatemala  
 
 **Universidad:**  
-[Nombre de tu Universidad]  
-📚 Facultad de Ingeniería  
-🎓 Carrera: Ingeniería en Sistemas  
+Universidad Mariano Gálvez
+ Facultad de Ingeniería  
+ Carrera: Ingeniería en Sistemas  
 
 ---
 
-## 📄 Licencia y Propiedad
+##  Licencia y Propiedad
 
 **Propiedad Intelectual:** Aljaba S.A.  
-**Desarrollo:** [Tu Nombre] (Proyecto de Graduación)  
+**Desarrollo:** Mario Estuardo López Rodas  
 **Uso:** Exclusivo para Aljaba S.A.  
 **Código:** Privado (repositorio privado en GitHub)
 
 ---
 
-## 🔄 Estado del Proyecto
+##  Estado del Proyecto
 
-**Estado Actual:** 📋 Planificación y Documentación  
-**Siguiente Fase:** 🛠️ Setup de Desarrollo  
+**Estado Actual:**  Planificación y Documentación  
+**Siguiente Fase:**  Setup de Desarrollo  
 **Progreso General:** 10%
 
 ### Tareas Completadas
@@ -358,14 +359,14 @@ Aljaba S.A.
 -  Análisis de costos
 
 ### Próximas Tareas
-- ⏳ Setup de repositorio Git
-- ⏳ Configuración de entornos (dev/prod)
-- ⏳ Implementación de autenticación
-- ⏳ Diseño de interfaces (mockups)
+-  Setup de repositorio Git
+-  Configuración de entornos (dev/prod)
+-  Implementación de autenticación
+-  Diseño de interfaces (mockups)
 
 ---
 
-## 📖 Referencias
+## Referencias
 
 ### Tecnologías
 - [React Documentation](https://react.dev)

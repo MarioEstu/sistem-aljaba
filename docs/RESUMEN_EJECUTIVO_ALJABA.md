@@ -101,12 +101,12 @@ Múltiples configuraciones de página
 Generación rápida (< 10 segundos para 100 productos)  
 Descarga inmediata  
 
-### 4.5 Sistema de Compartir
-Enlaces únicos para clientes (sin necesidad de registro)  
-Control de permisos (solo ver / descargar)  
-Fechas de expiración configurables  
-Protección con contraseña (opcional)  
-Vista profesional para clientes  
+### 4.5 Sistema de Acceso para Empleados Ruteros (Guest Access)
+Cuentas de acceso individuales para cada empleado rutero (usuario y contraseña)  
+El Admin activa o desactiva qué catálogos son visibles para todos los Guests  
+Los empleados ven únicamente los catálogos habilitados por el Admin  
+Descarga de PDF de catálogos habilitados  
+Interfaz simple y responsive, optimizada para uso en campo desde celular o tablet  
 
 ---
 
@@ -167,10 +167,11 @@ Uptime garantizado del 99%
 - Control total del sistema
 
 ### Invitado (Guest)
-**¿Quién?** Vendedores de Aljaba  
+**¿Quién?** Empleados ruteros de Aljaba  
 **¿Qué puede hacer?**
-- Ver catálogos compartidos
-- Descargar PDFs (si tiene permiso)
+- Iniciar sesión con usuario y contraseña propios
+- Ver los catálogos que el Admin ha habilitado para Guests
+- Descargar PDFs de los catálogos habilitados
 
 ---
 
@@ -185,7 +186,7 @@ Uptime garantizado del 99%
 | **4. Editor Visual Avanzado** | 3 semanas | Editor completo con capas |
 | **5. Catálogos** | 4 semanas | Diseño y selección de productos |
 | **6. Generación PDF** | 2 semanas | PDFs de alta calidad |
-| **7. Sistema Guest** | 1 semana | Enlaces compartidos |
+| **7. Sistema Guest** | 1 semana | Vista de empleados ruteros |
 | **8. Testing y Deploy** | 2 semanas | Sistema en producción |
 
 **Total: 20 semanas (5 meses)**

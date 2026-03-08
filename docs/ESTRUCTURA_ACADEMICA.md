@@ -1,164 +1,66 @@
 # Estructura Académica del Proyecto de Graduación
 
-## Proyecto: Sistema de Gestión y Generación de Catálogos Digitales para Aljaba S.A.
+## Desarrollo e implementación de un sistema web para optimizar la gestión de catálogos en Aljaba S.A.
 
 ---
 
-## PORTADA
+## INTRODUCCIÓN 
 
-**Universidad:** [Nombre de tu Universidad]  
-**Facultad:** Ingeniería  
-**Carrera:** Ingeniería en Sistemas / Informática  
-
-**Título del Proyecto:**  
-Sistema Web de Gestión y Generación de Catálogos Digitales para Aljaba S.A.
-
-**Estudiante:**  
-Mario Estuardo López Rodas  
-Carné: 0900-22-9412
-
----
-
-## ÍNDICE SUGERIDO
-
-### CAPÍTULO I: INTRODUCCIÓN
-1.1. Antecedentes  
-1.2. Planteamiento del Problema  
-1.3. Justificación  
-1.4. Objetivos  
-  - 1.4.1. Objetivo General  
-  - 1.4.2. Objetivos Específicos  
-1.5. Alcances y Limitaciones  
-1.6. Metodología de Desarrollo  
-
-### CAPÍTULO II: MARCO TEÓRICO
-2.1. Conceptos Fundamentales  
-  - 2.1.1. Sistemas de Gestión de Contenido  
-  - 2.1.2. Catálogos Digitales  
-  - 2.1.3. Generación Dinámica de PDF  
-  - 2.1.4. Procesamiento de Imágenes  
-2.2. Tecnologías de Desarrollo Web  
-  - 2.2.1. Arquitectura Cliente-Servidor  
-  - 2.2.2. Single Page Applications (SPA)  
-  - 2.2.3. APIs RESTful  
-2.3. Tecnologías Específicas  
-  - 2.3.1. React.js y TypeScript  
-  - 2.3.2. Node.js y Express  
-  - 2.3.3. PostgreSQL  
-  - 2.3.4. Cloud Storage (S3)  
-2.4. Metodologías de Desarrollo  
-  - 2.4.1. Desarrollo Ágil  
-  - 2.4.2. Metodología Incremental  
-2.5. Estado del Arte  
-  - 2.5.1. Soluciones Existentes (Catalog Machine, Canva)  
-  - 2.5.2. Comparativa de Tecnologías  
-
-### CAPÍTULO III: ANÁLISIS DEL SISTEMA
-3.1. Situación Actual de la Empresa  
-3.2. Análisis del Flujo de Trabajo Actual  
-3.3. Identificación de Problemas  
-3.4. Requerimientos del Sistema  
-  - 3.4.1. Requerimientos Funcionales  
-  - 3.4.2. Requerimientos No Funcionales  
-3.5. Actores del Sistema  
-3.6. Casos de Uso  
-3.7. Diagramas UML  
-  - 3.7.1. Diagrama de Casos de Uso  
-  - 3.7.2. Diagrama de Actividades  
-  - 3.7.3. Diagrama de Secuencia  
-
-### CAPÍTULO IV: DISEÑO DEL SISTEMA
-4.1. Arquitectura del Sistema  
-  - 4.1.1. Arquitectura de 3 Capas  
-  - 4.1.2. Componentes del Sistema  
-4.2. Diseño de Base de Datos  
-  - 4.2.1. Modelo Entidad-Relación  
-  - 4.2.2. Modelo Relacional  
-  - 4.2.3. Diccionario de Datos  
-4.3. Diseño de Interfaces  
-  - 4.3.1. Wireframes  
-  - 4.3.2. Mockups de Alta Fidelidad  
-4.4. Diagramas de Diseño  
-  - 4.4.1. Diagrama de Clases  
-  - 4.4.2. Diagrama de Componentes  
-  - 4.4.3. Diagrama de Despliegue  
-4.5. Especificación de APIs  
-4.6. Diseño de Seguridad  
-
-### CAPÍTULO V: IMPLEMENTACIÓN
-5.1. Entorno de Desarrollo  
-  - 5.1.1. Herramientas de Desarrollo  
-  - 5.1.2. Control de Versiones (Git)  
-5.2. Configuración del Proyecto  
-  - 5.2.1. Estructura del Proyecto  
-  - 5.2.2. Dependencias y Librerías  
-5.3. Implementación del Frontend  
-  - 5.3.1. Componentes React  
-  - 5.3.2. Gestión de Estado  
-  - 5.3.3. Integración con API  
-5.4. Implementación del Backend  
-  - 5.4.1. Rutas y Controladores  
-  - 5.4.2. Servicios de Negocio  
-  - 5.4.3. Acceso a Datos (Prisma ORM)  
-5.5. Módulos Principales  
-  - 5.5.1. Módulo de Autenticación  
-  - 5.5.2. Módulo de Productos  
-  - 5.5.3. Módulo de Imágenes y Editor  
-  - 5.5.4. Módulo de Catálogos  
-  - 5.5.5. Módulo de Generación de PDF  
-  - 5.5.6. Módulo de Acceso Guest  
-5.6. Desafíos Técnicos y Soluciones  
-
-### CAPÍTULO VI: PRUEBAS Y VALIDACIÓN
-6.1. Plan de Pruebas  
-6.2. Pruebas Unitarias  
-6.3. Pruebas de Integración  
-6.4. Pruebas de Sistema  
-6.5. Pruebas de Aceptación  
-6.6. Pruebas de Rendimiento  
-6.7. Pruebas de Seguridad  
-6.8. Resultados de las Pruebas  
-6.9. Validación con Usuarios Finales  
-
-### CAPÍTULO VII: DESPLIEGUE Y MANTENIMIENTO
-7.1. Infraestructura de Despliegue  
-7.2. Proceso de Despliegue  
-7.3. Configuración de Producción  
-7.4. Monitoreo y Logs  
-7.5. Plan de Mantenimiento  
-7.6. Manual de Usuario  
-7.7. Manual Técnico  
-
-### CAPÍTULO VIII: ANÁLISIS DE COSTOS
-8.1. Costos de Desarrollo  
-8.2. Costos de Infraestructura  
-8.3. Análisis Comparativo (Antes vs. Después)  
-8.4. Retorno de Inversión (ROI)  
-8.5. Proyección de Costos a 5 Años  
-
-### CAPÍTULO IX: CONCLUSIONES Y RECOMENDACIONES
-9.1. Conclusiones  
-9.2. Logros Alcanzados  
-9.3. Lecciones Aprendidas  
-9.4. Recomendaciones  
-9.5. Trabajo Futuro  
-
-### REFERENCIAS BIBLIOGRÁFICAS
-
-### APÉNDICES
-A. Código Fuente (Extractos Relevantes)  
-B. Manuales de Usuario  
-C. Documentación Técnica Completa  
-D. Resultados de Encuestas/Entrevistas  
-E. Capturas de Pantalla del Sistema  
-
----
-
-## CAPÍTULO I: INTRODUCCIÓN (DESARROLLADO)
+En la actualidad, la presencia digital se ha convertido en un factor determinante para la
+competitividad de las empresas comerciales, especialmente cuando se requiere presentar
+productos de forma clara, atractiva y actualizada para facilitar la decisión de compra. En
+este contexto, los catálogos digitales representan un medio práctico para comunicar
+información relevante como descripción, precio, disponibilidad, imágenes y características
+de los productos, permitiendo que los clientes consulten opciones sin depender de la
+atención presencial. Sin embargo, en distintas organizaciones el proceso de elaboración y
+mantenimiento de catálogos suele realizarse de manera manual, con uso de archivos
+dispersos y procedimientos no estandarizados, lo cual provoca retrasos, duplicidad de
+esfuerzos, inconsistencias en la información y costos operativos innecesarios.
+La empresa Aljaba S.A. no es ajena a esta situación. La gestión de información de
+productos y la generación de catálogos puede convertirse en una actividad repetitiva que
+consume tiempo del personal, principalmente cuando se requiere actualizar precios, corregir
+descripciones, sustituir imágenes o preparar catálogos para temporadas específicas y
+distintos canales de difusión. Esta forma de trabajo tiende a afectar la eficiencia del proceso,
+debido a que la información se modifica en varios lugares, no existe un control centralizado
+y se incrementa el riesgo de errores en datos publicados. Como consecuencia, se reduce la
+agilidad para responder a solicitudes comerciales, se limita la consistencia de la información
+entregada al cliente y se eleva el costo asociado a la elaboración y mantenimiento de
+materiales promocionales.
+Ante lo anterior, el presente trabajo de graduación plantea el desarrollo e implementación de
+un sistema web para optimizar la gestión de catálogos en Aljaba S.A., con el propósito de
+centralizar la administración de productos y automatizar la generación de catálogos digitales
+bajo un enfoque ordenado y controlado. El sistema se orienta a disminuir el tiempo
+empleado en tareas repetitivas, mejorar la eficiencia operativa y reducir costos relacionados
+con reprocesos, correcciones y elaboración manual. Asimismo, se busca establecer una
+base tecnológica que facilite la actualización de información, mantenga coherencia en los
+datos publicados y permita producir catálogos con estructura uniforme, listos para su
+difusión digital.
+La importancia de esta investigación se sustenta en la necesidad de obtener resultados
+verificables y medibles que evidencien una mejora real en el proceso actual de Aljaba S.A.
+Para ello, se realizará una evaluación comparativa del desempeño antes y después de la
+implementación del sistema, considerando indicadores como el tiempo requerido para
+generar un catálogo, el tiempo de actualización de información, la eficiencia en la gestión de
+productos y el ahorro de costos asociado a la reducción de reprocesos y correcciones. Con
+base en esta medición, será posible respaldar con evidencia el aporte práctico del sistema
+dentro de la empresa y su contribución a la optimización de las actividades relacionadas con
+la administración y generación de catálogos digitales.
+El alcance del trabajo se enfoca en diseñar, construir e implementar una solución web que
+contemple la administración de productos, categorías, precios, imágenes y características,
+además de la generación de catálogos digitales con criterios definidos por la empresa.
+También se contempla la identificación de usuarios que interactúan con el sistema, el
+levantamiento de requerimientos y la definición de reglas operativas. De forma
+complementaria, se desarrollará la ruta metodológica para la medición de resultados,
+mediante instrumentos de recolección de datos y el análisis correspondiente, con el fin de
+sustentar las conclusiones del estudio.
+En síntesis, este trabajo propone una solución aplicable y medible para mejorar un proceso
+específico dentro de Aljaba S.A., integrando el desarrollo e implementación de un sistema
+web con una evaluación de resultados basada en evidencia. Con ello, se pretende contribuir
+a la optimización de la gestión de catálogos, fortalecer la eficiencia operativa y demostrar el
+valor de una implementación tecnológica orientada a necesidades reales de la empresa.
 
 ### 1.1. Antecedentes
 
-Aljaba S.A. es una empresa guatemalteca dedicada a la comercialización de productos diversos, fundada en [año]. La empresa ha experimentado un crecimiento sostenido, pasando de un catálogo inicial de pocos cientos de productos a gestionar actualmente aproximadamente 4,000 productos, con una proyección de alcanzar 10,000 productos para finales del año 2026.
+Aljaba S.A. es una empresa guatemalteca dedicada a la comercialización de productos diversos. La empresa ha experimentado un crecimiento sostenido, pasando de un catálogo inicial de pocos cientos de productos a gestionar actualmente aproximadamente 4,000 productos, con una proyección de alcanzar 10,000 productos para finales del año 2026.
 
 En el contexto actual del comercio digital, la presentación visual de productos mediante catálogos digitales se ha convertido en una herramienta fundamental para la comunicación con clientes y la generación de ventas. Aljaba S.A. reconoce esta necesidad y ha implementado un flujo de trabajo que involucra múltiples plataformas externas: Canva para edición de imágenes, Postimages para almacenamiento, y Catalog Machine para generación de catálogos en PDF.
 
@@ -453,42 +355,6 @@ Se utilizará una metodología híbrida que combina principios de **Desarrollo �
 - **Demos incrementales:** Al final de cada sprint
 - **Canal de comunicación:** Email + WhatsApp para urgencias
 - **Validaciones:** Requieren aprobación escrita del cliente
-
----
-
-## RECOMENDACIONES PARA LA REDACCIÓN ACADÉMICA
-
-### Extensión Sugerida por Capítulo
-
-| Capítulo | Páginas Sugeridas |
-|----------|-------------------|
-| I. Introducción | 10-15 |
-| II. Marco Teórico | 20-25 |
-| III. Análisis | 15-20 |
-| IV. Diseño | 20-25 |
-| V. Implementación | 25-30 |
-| VI. Pruebas | 15-20 |
-| VII. Despliegue | 10-15 |
-| VIII. Costos | 8-10 |
-| IX. Conclusiones | 8-10 |
-
-**Total estimado:** 130-170 páginas
-
-### Formato Académico
-
-- **Fuente:** Arial o Times New Roman, 12pt
-- **Interlineado:** 1.5 o doble espacio
-- **Márgenes:** 2.5cm todos los lados
-- **Numeración:** Romanas para preliminares, árabigas para contenido
-- **Citas:** Formato APA o IEEE (según tu universidad)
-
-### Elementos Importantes
-
-1. **Figuras y Tablas:** Todas numeradas y referenciadas en el texto
-2. **Código Fuente:** Solo fragmentos clave en apéndices
-3. **Capturas de Pantalla:** Alta calidad, bien etiquetadas
-4. **Diagramas:** Profesionales, usando herramientas como Draw.io, Lucidchart
-5. **Referencias:** Mínimo 30 fuentes bibliográficas (libros, papers, documentación oficial)
 
 ---
 
