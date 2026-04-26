@@ -122,6 +122,21 @@
    - Costos de infraestructura mensual
    - Proyección a 12 meses
 
+3. **[ANALISIS_COSTOS_DETALLADO.md](ANALISIS_COSTOS_DETALLADO.md)**
+   - Análisis detallado de costos de desarrollo, despliegue y mantenimiento
+   - Referencias bibliográficas en formato APA con URLs exactas
+   - Comparación de alternativas de infraestructura
+   - Proyección de ahorro a 3 años
+
+4. **[ESTIMACION_PUNTOS_FUNCION.md](ESTIMACION_PUNTOS_FUNCION.md)**
+   - Estimación por Puntos de Función de Albrecht (método IFPUG)
+   - Conteo de 51 componentes funcionales (EI, EO, EQ, ILF, EIF)
+   - Factor de Ajuste de Valor (VAF = 1.07)
+   - AFP = 271 Puntos de Función Ajustados
+   - Conversión a horas: 813 horas de desarrollo
+   - Validación contra cronograma de 5-6 meses
+   - Cuadros de costos por categoría (desarrollo, despliegue, integración, mantenimiento)
+
 ---
 
 ## Descripción de Cada Documento
@@ -237,6 +252,41 @@
 
 ---
 
+### Documentos de Análisis Financiero
+
+#### 8. ANALISIS_COSTOS_DETALLADO.md
+**Audiencia:** Desarrollador, directores de Aljaba, comité académico  
+**Propósito:** Análisis completo de costos con referencias bibliográficas APA  
+**Contenido:**
+- Costos de desarrollo (costo directo Q0 + valor de mercado Q40,650)
+- Análisis de infraestructura con precios de proveedores
+- Costos de despliegue y mantenimiento
+- Referencias APA con URLs verificables
+- Proyección de ahorro a 3 años ($3,162.60 USD)
+
+**Cuándo leerlo:** Para fundamentar el capítulo de costos en la tesis
+
+---
+
+#### 9. ESTIMACION_PUNTOS_FUNCION.md
+**Audiencia:** Comité académico, desarrollador  
+**Propósito:** Estimación formal del tamaño y esfuerzo del sistema por método IFPUG  
+**Contenido:**
+- Fundamento del método (Albrecht 1979, IFPUG 2010)
+- Identificación y conteo de 51 componentes funcionales
+- 26 Entradas Externas (EI) = 100 puntos
+- 8 Salidas Externas (EO) = 41 puntos
+- 8 Consultas Externas (EQ) = 28 puntos
+- 7 Archivos Lógicos Internos (ILF) = 74 puntos
+- 2 Archivos de Interfaz Externa (EIF) = 10 puntos
+- UFP = 253, VAF = 1.07, AFP = 271
+- Estimación: 813 horas a 3h/PF (validado contra 800h máximo acordado)
+- Costos por categoría con valor de mercado vs. costo directo para Aljaba
+
+**Cuándo leerlo:** Para el capítulo de análisis de costos y planificación del proyecto
+
+---
+
 ## Estructura de Carpetas
 
 ```
@@ -251,6 +301,8 @@ Proyecto de Graduacion Catalog Aljaba/
 │   ├── DOCUMENTO_PROYECTO.md     
 │   ├── REQUERIMIENTOS_DETALLADOS.md 
 │   ├── ARQUITECTURA_SISTEMA.md 
+│   ├── ANALISIS_COSTOS_DETALLADO.md   # Análisis de costos con referencias APA
+│   ├── ESTIMACION_PUNTOS_FUNCION.md   # Estimación por Puntos de Función de Albrecht
 │   │
 │   ├── diagramas/
 │   │   └── DIAGRAMAS_UML.md           # Todos los diagramas UML
@@ -270,5 +322,5 @@ Proyecto de Graduacion Catalog Aljaba/
 - Se modifique la estructura de carpetas
 - Se creen guías adicionales
 
-**Última actualización:** 14 de febrero de 2026  
+**Última actualización:** 12 de abril de 2026  
 **Próxima revisión:** Al finalizar Fase 1 de desarrollo

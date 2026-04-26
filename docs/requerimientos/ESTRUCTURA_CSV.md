@@ -5,7 +5,7 @@
 Este documento describe la estructura FIJA del archivo CSV que Aljaba S.A. utiliza para gestionar sus productos.
 
 Cambio importante respecto a la version anterior:
-La columna `image` ha sido eliminada del CSV. La vinculacion de imagenes a productos ahora es automatica y se basa en el nombre del archivo de imagen, el cual debe coincidir exactamente con el campo `Name` del producto. Ver seccion "Proceso de Pre-importacion" mas abajo.
+La columna `image` ha sido eliminada del CSV. La vinculacion de imagenes a productos ahora es automatica y se basa en el nombre del archivo de imagen, el cual debe coincidir (de forma insensible a mayusculas/minusculas) con el campo `Name` del producto. Ver seccion "Proceso de Pre-importacion" mas abajo.
 
 ---
 
@@ -21,7 +21,7 @@ Name | code | description | category | price1 | price2 | price3 | price4 | price
 
 | # | Nombre Campo | Tipo de Dato | Obligatorio | Descripcion | Ejemplo |
 |---|--------------|--------------|-------------|-------------|---------|
-| 1 | **Name** | String | Si | Nombre del producto. Debe coincidir con el nombre del archivo de imagen ya subido (sin extension) | "001lampara" |
+| 1 | **Name** | String | Si | Nombre del producto. Debe coincidir con el nombre del archivo de imagen ya subido (sin extension, insensible a mayusculas/minusculas) | "001lampara" |
 | 2 | **code** | String | Si | Codigo unico del producto | "GE-75003WM" |
 | 3 | **description** | Text | Si | Descripcion detallada del producto | "BOMB LED G" |
 | 4 | **category** | String | Si | Categoria del producto | "Iluminacion" |
@@ -55,17 +55,19 @@ Paso 3: Revisar el reporte de importacion
 ```
 
 **Convencion de nombres para archivos de imagen:**
-- El nombre del archivo (sin extension) debe ser identico al valor del campo `Name` en el CSV
-- La comparacion es exacta y sensible a mayusculas/minusculas
+- El nombre del archivo (sin extension) debe corresponder al valor del campo `Name` en el CSV
+- La comparacion es **insensible a mayusculas/minusculas (case-insensitive)**: el sistema convierte ambos a minusculas antes de comparar
 - Extensiones aceptadas: `.jpg`, `.jpeg`, `.png`, `.webp`
 
-Ejemplos correctos:
+Ejemplos validos:
 
-| Name en CSV | Nombre de archivo de imagen |
-|-------------|----------------------------|
-| 001lampara | 001lampara.jpg |
-| GE-75003WM-bombilla | GE-75003WM-bombilla.png |
-| tuberiaA12 | tuberiaA12.webp |
+| Name en CSV | Nombre de archivo de imagen | Resultado |
+|-------------|----------------------------|-----------|
+| 001lampara | 001lampara.jpg | Vincula |
+| 001lampara | 001Lampara.jpg | Vincula (case-insensitive) |
+| 001lampara | 001LAMPARA.PNG | Vincula (case-insensitive) |
+| GE-75003WM-bombilla | GE-75003WM-bombilla.png | Vincula |
+| tuberiaA12 | tuberiaa12.webp | Vincula (case-insensitive) |
 
 ---
 
@@ -284,7 +286,7 @@ function validateCSVRow(row, rowNumber, imageGallery) {
   }
 
   const imageFound = imageGallery.find(
-    img => img.nameWithoutExtension === row.Name
+    img => img.nameWithoutExtension.toLowerCase() === row.Name.toLowerCase()
   );
   if (!imageFound) {
     warnings.push(`Fila ${rowNumber}: no se encontro imagen con nombre "${row.Name}", producto importado sin imagen`);

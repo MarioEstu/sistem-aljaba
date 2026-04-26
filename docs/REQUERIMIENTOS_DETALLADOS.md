@@ -45,18 +45,18 @@ Entradas:
 **Descripción:** Permitir a usuarios registrados acceder al sistema.
 
 **Entradas:**
-- Email
+- Nombre de usuario
 - Contraseña
 
 **Proceso:**
-1. Buscar usuario por email
+1. Buscar usuario por nombre de usuario
 2. Verificar contraseña encriptada
 3. Generar token JWT con expiración de 24h
 4. Incluir rol del usuario en el token
 
 **Salidas:**
 - Token de sesión
-- Información del usuario (nombre, email, rol)
+- Información del usuario (nombre, nombre de usuario, rol)
 
 **Reglas de Negocio:**
 - Máximo 5 intentos fallidos antes de bloqueo temporal (15 minutos)
@@ -120,7 +120,7 @@ Name,code,description,category,price1,price2,price3,price4,price5,price6,Stock Q
    - Campos obligatorios presentes
    - Tipos de datos correctos
    - Códigos únicos
-4. Para cada producto, buscar en la galería de imágenes del sistema una imagen cuyo nombre coincida exactamente con el campo `Name`
+4. Para cada producto, buscar en la galería de imágenes del sistema una imagen cuyo nombre (sin extensión, insensible a mayúsculas/minúsculas) coincida con el campo `Name`
 5. Mostrar reporte de validación (errores, advertencias e imágenes no encontradas)
 6. Permitir corregir o continuar
 7. Importar productos válidos
@@ -304,10 +304,11 @@ El Admin puede seleccionar productos para un catálogo filtrando por categoría 
 **Formatos Soportados:** JPG, JPEG, PNG, WEBP
 
 **Convención de Nombres Obligatoria:**
-El nombre del archivo de imagen debe ser exactamente igual al valor del campo `Name` del producto en el CSV. Esta es la clave de vinculación automática.
+El nombre del archivo de imagen debe corresponder al valor del campo `Name` del producto en el CSV. Esta es la clave de vinculación automática.
 
-- Ejemplo: si el producto tiene `Name = 001lampara`, el archivo de imagen debe llamarse `001lampara.jpg` (o `.png`, `.webp`)
-- La extension del archivo es ignorada para la comparacion; solo importa el nombre sin extension
+- Ejemplo: si el producto tiene `Name = 001lampara`, el archivo de imagen puede llamarse `001lampara.jpg`, `001Lampara.jpg` o `001LAMPARA.PNG`; todos son válidos.
+- La comparación de nombres es **insensible a mayúsculas/minúsculas (case-insensitive)**: `001Lampara` y `001lampara` se consideran el mismo nombre.
+- La extensión del archivo es ignorada para la comparación; solo importa el nombre sin extensión.
 
 **Proceso:**
 1. Validar formato y tamaño (max 10MB)
@@ -377,8 +378,7 @@ El nombre del archivo de imagen debe ser exactamente igual al valor del campo `N
 - Canvas HTML5 para renderizado
 - Historial de cambios (undo/redo hasta 20 acciones)
 - Exportar en PNG o JPG
-- Guardar como nueva versión (no sobreescribir original)
-- Al guardar version editada, el nombre se mantiene para conservar la vinculacion con el producto
+- **Al guardar, la imagen editada sobreescribe la imagen original en el almacenamiento.** El nombre del archivo se mantiene igual para conservar la vinculación automática con el producto. La versión original es descartada y no se conserva copia.
 
 ---
 
@@ -396,7 +396,7 @@ El nombre del archivo de imagen debe ser exactamente igual al valor del campo `N
 - También puede subir una nueva imagen directamente desde el formulario del producto
 
 **Reglas de Negocio:**
-- La comparación de nombres es exacta y sensible a mayúsculas/minúsculas
+- La comparación de nombres es **insensible a mayúsculas/minúsculas (case-insensitive)**: el sistema convierte ambos nombres a minúsculas antes de comparar
 - Solo se acepta un archivo de imagen por nombre (si hay duplicados, el sistema alerta al Admin)
 - Las imágenes deben cargarse al sistema antes de importar el CSV para garantizar la vinculación automática
 - Si se sube una imagen con el mismo nombre que un producto existente sin imagen, el sistema la vincula automáticamente
@@ -495,29 +495,47 @@ El nombre del archivo de imagen debe ser exactamente igual al valor del campo `N
 ### 1.5 Módulo de Exportación PDF
 
 #### RF-PDF-01: Generar PDF
-**Descripción:** Crear archivo PDF del catálogo diseñado.
+**Descripción:** Crear archivo PDF del catálogo diseñado de forma asíncrona mediante una cola de procesamiento. La generación nunca bloquea la interfaz ni el servidor; el usuario es notificado cuando el PDF está listo.
 
-**Proceso:**
-1. Renderizar cada página del catálogo
-2. Aplicar estilos y configuraciones
-3. Incrustar imágenes de alta calidad
-4. Generar tabla de contenidos (opcional)
-5. Compilar PDF
-6. Comprimir para web (si se solicita)
+**Proceso (basado en cola de trabajos):**
+1. Admin solicita generación del PDF desde la interfaz
+2. El sistema registra un trabajo en la cola (`pdf_jobs`) con estado `pending`
+3. El backend responde inmediatamente con el ID del trabajo; la interfaz muestra estado "Generando..."
+4. El worker del servidor toma el trabajo de la cola y lo procesa:
+   a. Renderizar cada página del catálogo con Puppeteer
+   b. Aplicar estilos y configuraciones
+   c. Incrustar imágenes de alta calidad
+   d. Generar tabla de contenidos (si se solicitó)
+   e. Compilar y comprimir el PDF
+   f. Subir el PDF generado al almacenamiento en nube (S3/Spaces)
+   g. Guardar la URL del PDF en el campo `pdf_url` del catálogo
+5. El estado del trabajo cambia a `completed`; la interfaz muestra el botón de descarga
+6. Si ocurre un error, el estado cambia a `failed` y se muestra mensaje al Admin
+
+**Estados del trabajo en cola:**
+
+| Estado | Descripción |
+|--------|-------------|
+| `pending` | Trabajo encolado, esperando al worker |
+| `processing` | Worker procesando activamente |
+| `completed` | PDF generado y disponible para descarga |
+| `failed` | Error durante la generación; puede reintentarse |
 
 **Configuraciones de Exportación:**
 - Calidad de imágenes (alta/media/baja)
 - Incluir marcas de agua
-- Protección con contraseña (opcional)
 - Tamaño de archivo (optimizado/original)
 
 **Salidas:**
-- Archivo PDF descargable
-- Metadata del PDF (tamaño, páginas, fecha)
+- URL del PDF almacenado en nube
+- Metadata del PDF (tamaño, páginas, fecha de generación)
 
 **Reglas de Negocio:**
-- Tiempo máximo de generación: 30 segundos para catálogos de hasta 100 productos
-- PDF generado se almacena temporalmente (24 horas) para re-descarga
+- La generación es siempre asíncrona; nunca sincrónica
+- El worker procesa de a un trabajo a la vez para evitar sobrecarga de memoria del servidor
+- Si el catálogo ya tiene un `pdf_url` previo, la nueva generación lo sobreescribe
+- El PDF generado se almacena permanentemente (no tiene expiración) y puede descargarse las veces que sea necesario
+- En caso de fallo, el Admin puede reintentar la generación desde la interfaz
 
 ---
 
@@ -591,7 +609,7 @@ El nombre del archivo de imagen debe ser exactamente igual al valor del campo `N
 | RNF-PERF-01 | Carga inicial de página | < 3 seg | Sí |
 | RNF-PERF-02 | Búsqueda de productos | < 1 seg | Sí |
 | RNF-PERF-03 | Carga de galería (50 imgs) | < 2 seg | No |
-| RNF-PERF-04 | Generación PDF (100 productos) | < 10 seg | Sí |
+| RNF-PERF-04 | Generación PDF (100 productos) | < 60 seg (asíncrono, en cola) | Sí |
 | RNF-PERF-05 | Importación CSV (1000 productos) | < 30 seg | Sí |
 | RNF-PERF-06 | Guardado de cambios en editor | < 500 ms | No |
 
@@ -718,8 +736,8 @@ El nombre del archivo de imagen debe ser exactamente igual al valor del campo `N
 - Puedo abrir editor desde el detalle del producto
 - Puedo aplicar filtros y efectos
 - Puedo agregar texto sobre la imagen
-- Cambios se guardan como nueva versión
-- Imagen editada se actualiza en producto
+- Al guardar, la imagen editada sobreescribe la original con el mismo nombre
+- La vinculación con el producto se mantiene sin necesidad de cambiar nada más
 
 ---
 

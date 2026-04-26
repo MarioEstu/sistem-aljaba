@@ -11,7 +11,7 @@ Sistema web integral para la gestión y generación de catálogos digitales de p
 **Propósito Académico:** Proyecto de Graduación - Ingeniería en Sistemas  
 **Duración Estimada:** 5 meses (20 semanas)  
 **Fecha de Inicio:** Febrero 2026  
-**Fecha de Entrega:** Junio 2026
+**Fecha de Entrega:** Julio 2026
 
 ---
 

@@ -72,7 +72,7 @@ Desarrollar un sistema web integral que unifique las funcionalidades de **Catalo
 
 5. **Sistema de Autenticación y Roles:**
    - **Admin:** acceso total al sistema
-   - **Guest:** visualización y descarga de catálogos compartidos
+   - **Guest:** visualización y descarga de catálogos habilitados por el Admin
 
 ---
 

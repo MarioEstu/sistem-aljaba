@@ -189,7 +189,7 @@
 | **Curva de aprendizaje** | Media | Baja (usa HTML/CSS) |
 
 
-**Decisión recomendada:** Iniciar con **Puppeteer** para velocidad de desarrollo, migrar a PDFKit si se necesita optimización.
+**Decisión recomendada:** Iniciar con **Puppeteer** para velocidad de desarrollo. La generación se ejecuta de forma **asíncrona mediante una cola de trabajos** (`pdf_jobs`) para evitar bloqueos del servidor y timeouts en catálogos grandes. Esta cola se implementa desde la Fase 1, no como optimización posterior.
 
 #### Validación
 **Zod** (misma librería que frontend)
@@ -233,10 +233,11 @@
 -- Tabla de usuarios
 users
   id: UUID PRIMARY KEY
-  email: VARCHAR UNIQUE
+  username: VARCHAR UNIQUE
   password_hash: VARCHAR
   name: VARCHAR
   role: ENUM('admin', 'guest')
+  active: BOOLEAN DEFAULT true
   created_at: TIMESTAMP
 
 -- Tabla de categorías (auto-referencial para jerarquía)
@@ -268,7 +269,7 @@ products
 images
   id: UUID PRIMARY KEY
   filename: VARCHAR
-  original_url: VARCHAR
+  url: VARCHAR
   thumbnail_url: VARCHAR
   s3_key: VARCHAR
   size_bytes: INTEGER
@@ -282,6 +283,8 @@ catalogs
   name: VARCHAR
   description: TEXT
   config: JSONB (formato, layout, estilos)
+  guest_visible: BOOLEAN DEFAULT false
+  pdf_url: VARCHAR NULLABLE
   created_by: UUID REFERENCES users(id)
   created_at: TIMESTAMP
   updated_at: TIMESTAMP
@@ -292,14 +295,17 @@ catalog_products
   catalog_id: UUID REFERENCES catalogs(id)
   product_id: UUID REFERENCES products(id)
   position: INTEGER (orden en catálogo)
-  
--- Tabla de visibilidad de catálogos para Guests
-catalog_guest_visibility
+
+-- Cola de trabajos de generación de PDF
+pdf_jobs
   id: UUID PRIMARY KEY
   catalog_id: UUID REFERENCES catalogs(id)
-  enabled: BOOLEAN DEFAULT false
-  updated_by: UUID REFERENCES users(id)
-  updated_at: TIMESTAMP
+  status: ENUM('pending', 'processing', 'completed', 'failed')
+  error_message: TEXT NULLABLE
+  requested_by: UUID REFERENCES users(id)
+  started_at: TIMESTAMP NULLABLE
+  completed_at: TIMESTAMP NULLABLE
+  created_at: TIMESTAMP
 ```
 
 ---
@@ -629,9 +635,10 @@ catalog-aljaba/
 
 ### Fase 6: Generación PDF (Semanas 16-17)
 - Generador de PDF con Puppeteer
-- Múltiples layouts
-- Configuración de estilos
-- Optimización de rendimiento
+- Cola de trabajos `pdf_jobs` para procesamiento asíncrono
+- Worker que procesa un trabajo a la vez para controlar uso de memoria
+- Polling desde el frontend para consultar estado del trabajo (pending → processing → completed/failed)
+- Múltiples layouts y configuración de estilos
 
 ### Fase 7: Guest Access (Semana 18)
 - Creación y gestión de cuentas Guest
@@ -652,7 +659,7 @@ catalog-aljaba/
 | Riesgo | Probabilidad | Impacto | Mitigación |
 |--------|--------------|---------|------------|
 | **Editor visual muy complejo** | Alta | Alto | Usar librerías probadas (Fabric.js), MVP con funcionalidades básicas primero |
-| **Generación PDF lenta** | Media | Alto | Caching de PDFs generados, generación asíncrona con cola |
+| **Generación PDF lenta / timeout** | Media | Alto | Cola de trabajos asíncrona (`pdf_jobs`) implementada desde Fase 6; worker de un proceso a la vez; PDFs almacenados en nube para re-descarga sin regenerar |
 | **Escalabilidad de imágenes** | Media | Medio | CDN desde inicio, optimización automática, lazy loading |
 | **Costos de hosting superan presupuesto** | Baja | Medio | Monitoreo constante, alertas de costos, plan de migración |
 | **Curva de aprendizaje TypeScript** | Media | Bajo | Documentación y tutoriales, pair programming |
