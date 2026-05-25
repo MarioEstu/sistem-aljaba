@@ -95,14 +95,14 @@ Los usuarios Guest son los empleados ruteros de Aljaba S.A. Su función es mostr
 Name,code,description,category,price1,price2,price3,price4,price5,price6,Stock Quality
 ```
 
-**Nota importante:** La columna `image` ha sido eliminada del CSV. La vinculación de imágenes a productos se realiza automáticamente por coincidencia de nombre de archivo con el campo `Name` del producto. Ver RF-IMG-04 para el detalle de este proceso.
+**Nota importante:** La columna `image` ha sido eliminada del CSV. La vinculación de imágenes a productos se realiza automáticamente por coincidencia de nombre de archivo con el campo `code` del producto. Ver RF-IMG-04 para el detalle de este proceso.
 
 **Campos del CSV:**
 
 | Campo | Tipo | Obligatorio | Descripción |
 |-------|------|-------------|-------------|
-| Name | String | Sí | Nombre del producto (debe coincidir con el nombre del archivo de imagen ya subido) |
-| code | String | Sí | Código único del producto |
+| Name | String | Sí | Nombre descriptivo del producto |
+| code | String | Sí | Código único del producto. Debe coincidir con el nombre del archivo de imagen ya subido (sin extensión, insensible a mayúsculas/minúsculas) |
 | description | Text | Sí | Descripción del producto |
 | category | String | Sí | Categoría del producto |
 | price1 | Decimal | Sí | Precio cantidad 1 (ej: unidad) |
@@ -120,7 +120,7 @@ Name,code,description,category,price1,price2,price3,price4,price5,price6,Stock Q
    - Campos obligatorios presentes
    - Tipos de datos correctos
    - Códigos únicos
-4. Para cada producto, buscar en la galería de imágenes del sistema una imagen cuyo nombre (sin extensión, insensible a mayúsculas/minúsculas) coincida con el campo `Name`
+4. Para cada producto, buscar en la galería de imágenes del sistema una imagen cuyo nombre (sin extensión, insensible a mayúsculas/minúsculas) coincida con el campo `code`
 5. Mostrar reporte de validación (errores, advertencias e imágenes no encontradas)
 6. Permitir corregir o continuar
 7. Importar productos válidos
@@ -132,7 +132,7 @@ Name,code,description,category,price1,price2,price3,price4,price5,price6,Stock Q
 
 **Reglas de Negocio:**
 - Las imágenes deben estar subidas al sistema ANTES de importar el CSV
-- Si no se encuentra imagen con el mismo `Name`, el producto se importa con imagen en blanco y se muestra advertencia
+- Si no se encuentra imagen con el mismo `code`, el producto se importa con imagen en blanco y se muestra advertencia
 - Si el código ya existe, preguntar si actualizar o omitir
 - Categorías nuevas se crean automáticamente
 
@@ -304,10 +304,10 @@ El Admin puede seleccionar productos para un catálogo filtrando por categoría 
 **Formatos Soportados:** JPG, JPEG, PNG, WEBP
 
 **Convención de Nombres Obligatoria:**
-El nombre del archivo de imagen debe corresponder al valor del campo `Name` del producto en el CSV. Esta es la clave de vinculación automática.
+El nombre del archivo de imagen debe corresponder al valor del campo `code` del producto en el CSV. Esta es la clave de vinculación automática.
 
-- Ejemplo: si el producto tiene `Name = 001lampara`, el archivo de imagen puede llamarse `001lampara.jpg`, `001Lampara.jpg` o `001LAMPARA.PNG`; todos son válidos.
-- La comparación de nombres es **insensible a mayúsculas/minúsculas (case-insensitive)**: `001Lampara` y `001lampara` se consideran el mismo nombre.
+- Ejemplo: si el producto tiene `code = GE-75003WW`, el archivo de imagen puede llamarse `GE-75003WW.jpg`, `ge-75003ww.jpg` o `GE-75003WW.PNG`; todos son válidos.
+- La comparación de nombres es **insensible a mayúsculas/minúsculas (case-insensitive)**: `GE-75003WW` y `ge-75003ww` se consideran el mismo nombre.
 - La extensión del archivo es ignorada para la comparación; solo importa el nombre sin extensión.
 
 **Proceso:**
@@ -383,11 +383,11 @@ El nombre del archivo de imagen debe corresponder al valor del campo `Name` del 
 ---
 
 #### RF-IMG-04: Vinculación Automática de Imágenes a Productos
-**Descripción:** El sistema vincula automáticamente imágenes a productos comparando el nombre del archivo de imagen con el campo `Name` del producto.
+**Descripción:** El sistema vincula automáticamente imágenes a productos comparando el nombre del archivo de imagen con el campo `code` del producto.
 
 **Proceso de Vinculación (ocurre al importar CSV):**
-1. Para cada fila del CSV, el sistema toma el valor del campo `Name`
-2. Busca en la galería de imágenes del sistema un archivo cuyo nombre (sin extensión) coincida exactamente con ese `Name`
+1. Para cada fila del CSV, el sistema toma el valor del campo `code`
+2. Busca en la galería de imágenes del sistema un archivo cuyo nombre (sin extensión) coincida exactamente con ese `code`
 3. Si encuentra coincidencia, vincula la imagen al producto
 4. Si no encuentra coincidencia, importa el producto sin imagen y registra la advertencia
 

@@ -4,6 +4,47 @@ Sistema web integral para la gestión y generación de catálogos digitales de p
 
 ---
 
+## Inicio rápido — Desarrollo local
+
+### Prerrequisitos
+- Node.js 20+
+- Docker Desktop (para PostgreSQL local)
+
+### 1. Levantar la base de datos
+
+```bash
+docker compose up -d
+```
+
+### 2. Backend
+
+```bash
+cd backend
+npm install
+npx prisma migrate dev --name init
+npm run db:seed          # Crea usuario admin/admin123
+npm run dev              # http://localhost:4000
+```
+
+### 3. Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev              # http://localhost:3000
+```
+
+### Credenciales de prueba
+
+| Usuario   | Contraseña | Rol   |
+|-----------|------------|-------|
+| admin     | admin123   | Admin |
+| rutero01  | guest123   | Guest |
+
+---
+
+---
+
 ## Información del Proyecto
 
 **Empresa Cliente:** Aljaba S.A. (Guatemala)  

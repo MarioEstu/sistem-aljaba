@@ -1,0 +1,150 @@
+// ============================================
+// Prisma Schema — Catalog Aljaba
+// ============================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// -------- Usuarios --------
+enum Role {
+  admin
+  guest
+}
+
+model User {
+  id           String    @id @default(uuid())
+  username     String    @unique
+  passwordHash String    @map("password_hash")
+  name         String
+  role         Role      @default(guest)
+  active       Boolean   @default(true)
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  catalogs     Catalog[]
+  pdfJobs      PdfJob[]
+
+  @@map("users")
+}
+
+// -------- Categorías (árbol auto-referencial) --------
+model Category {
+  id        String     @id @default(uuid())
+  name      String
+  parentId  String?    @map("parent_id")
+  createdAt DateTime   @default(now()) @map("created_at")
+
+  parent    Category?  @relation("CategoryTree", fields: [parentId], references: [id])
+  children  Category[] @relation("CategoryTree")
+  products  Product[]
+
+  @@map("categories")
+}
+
+// -------- Imágenes --------
+model Image {
+  id           String    @id @default(uuid())
+  filename     String
+  url          String
+  thumbnailUrl String?   @map("thumbnail_url")
+  s3Key        String    @map("s3_key")
+  sizeBytes    Int?      @map("size_bytes")
+  width        Int?
+  height       Int?
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  products        Product[]
+  catalogProducts CatalogProduct[] @relation("CatalogProductImageOverride")
+
+  @@map("images")
+}
+
+// -------- Productos --------
+model Product {
+  id          String    @id @default(uuid())
+  name        String
+  code        String    @unique
+  description String?
+  categoryId  String?   @map("category_id")
+  price1      Decimal?  @db.Decimal(10, 2)
+  price2      Decimal?  @db.Decimal(10, 2)
+  price3      Decimal?  @db.Decimal(10, 2)
+  price4      Decimal?  @db.Decimal(10, 2)
+  price5      Decimal?  @db.Decimal(10, 2)
+  price6      Decimal?  @db.Decimal(10, 2)
+  stock       Int?
+  imageId     String?   @map("image_id")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  category    Category? @relation(fields: [categoryId], references: [id])
+  image       Image?    @relation(fields: [imageId], references: [id])
+  catalogs    CatalogProduct[]
+
+  @@map("products")
+}
+
+// -------- Catálogos --------
+model Catalog {
+  id           String    @id @default(uuid())
+  name         String
+  slug         String    @unique
+  description  String?
+  config       Json      @default("{}")
+  guestVisible Boolean   @default(false) @map("guest_visible")
+  pdfUrl       String?   @map("pdf_url")
+  createdBy    String    @map("created_by")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  creator      User      @relation(fields: [createdBy], references: [id])
+  products     CatalogProduct[]
+  pdfJobs      PdfJob[]
+
+  @@map("catalogs")
+}
+
+// -------- Relación Catálogo-Producto (many-to-many) --------
+model CatalogProduct {
+  id              String   @id @default(uuid())
+  catalogId       String   @map("catalog_id")
+  productId       String   @map("product_id")
+  position        Int      @default(0)
+  imageOverrideId String?  @map("image_override_id")
+
+  catalog       Catalog  @relation(fields: [catalogId], references: [id], onDelete: Cascade)
+  product       Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  imageOverride Image?   @relation("CatalogProductImageOverride", fields: [imageOverrideId], references: [id])
+
+  @@unique([catalogId, productId])
+  @@map("catalog_products")
+}
+
+// -------- Cola de trabajos PDF --------
+enum PdfJobStatus {
+  pending
+  processing
+  completed
+  failed
+}
+
+model PdfJob {
+  id           String        @id @default(uuid())
+  catalogId    String        @map("catalog_id")
+  status       PdfJobStatus  @default(pending)
+  errorMessage String?       @map("error_message")
+  requestedBy  String        @map("requested_by")
+  startedAt    DateTime?     @map("started_at")
+  completedAt  DateTime?     @map("completed_at")
+  createdAt    DateTime      @default(now()) @map("created_at")
+
+  catalog      Catalog       @relation(fields: [catalogId], references: [id])
+  requester    User          @relation(fields: [requestedBy], references: [id])
+
+  @@map("pdf_jobs")
+}

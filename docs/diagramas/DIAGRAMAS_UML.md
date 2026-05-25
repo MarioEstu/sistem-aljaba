@@ -76,7 +76,7 @@ graph TB
 | UC2 | Importar CSV | Admin | Carga masiva de productos desde archivo CSV (11 columnas) |
 | UC3 | Gestionar Productos | Admin | CRUD completo de productos |
 | UC4 | Gestionar Categorias y Categorias Padre | Admin | Crear categorias, subcategorias y categorias padre que agrupan categorias |
-| UC5 | Cargar Imagenes | Admin | Subir imagenes al sistema con nombre igual al Name del producto |
+| UC5 | Cargar Imagenes | Admin | Subir imagenes al sistema con nombre igual al code del producto |
 | UC6 | Editar Imagenes | Admin | Edicion avanzada con capas y efectos |
 | UC7 | Crear Catalogo | Admin | Iniciar nuevo catalogo |
 | UC8 | Disenar Layout Catalogo | Admin | Personalizar apariencia del catalogo |
@@ -271,7 +271,7 @@ sequenceDiagram
 
         loop Para cada fila del CSV
             CSVService->>CSVService: validateRow(row)
-            CSVService->>ImageService: buscarImagenPorNombre(row.Name)
+            CSVService->>ImageService: buscarImagenPorNombre(row.code)
             ImageService-->>CSVService: imagen encontrada / advertencia sin imagen
         end
 
@@ -659,7 +659,7 @@ flowchart TD
     B -->|No| C0[Subir imagenes al sistema]
     B -->|Si| D[Gestionar productos]
 
-    C0 --> C0a[Nombrar cada imagen igual al Name del producto]
+    C0 --> C0a[Nombrar cada imagen igual al code del producto]
     C0a --> C[Importar CSV]
     C --> C1[Subir archivo CSV de 11 columnas]
     C1 --> C2[Validar estructura]

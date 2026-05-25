@@ -4,8 +4,7 @@
 
 Este documento describe la estructura FIJA del archivo CSV que Aljaba S.A. utiliza para gestionar sus productos.
 
-Cambio importante respecto a la version anterior:
-La columna `image` ha sido eliminada del CSV. La vinculacion de imagenes a productos ahora es automatica y se basa en el nombre del archivo de imagen, el cual debe coincidir (de forma insensible a mayusculas/minusculas) con el campo `Name` del producto. Ver seccion "Proceso de Pre-importacion" mas abajo.
+La columna `image` ha sido eliminada del CSV. La vinculacion de imagenes a productos es automatica y se basa en el nombre del archivo de imagen, el cual debe coincidir (de forma insensible a mayusculas/minusculas) con el campo `code` del producto. Ver seccion "Proceso de Pre-importacion" mas abajo.
 
 ---
 
@@ -21,8 +20,8 @@ Name | code | description | category | price1 | price2 | price3 | price4 | price
 
 | # | Nombre Campo | Tipo de Dato | Obligatorio | Descripcion | Ejemplo |
 |---|--------------|--------------|-------------|-------------|---------|
-| 1 | **Name** | String | Si | Nombre del producto. Debe coincidir con el nombre del archivo de imagen ya subido (sin extension, insensible a mayusculas/minusculas) | "001lampara" |
-| 2 | **code** | String | Si | Codigo unico del producto | "GE-75003WM" |
+| 1 | **Name** | String | Si | Nombre descriptivo del producto | "Bombilla LED 75W" |
+| 2 | **code** | String | Si | Codigo unico del producto. Debe coincidir con el nombre del archivo de imagen ya subido (sin extension, insensible a mayusculas/minusculas) | "GE-75003WW" |
 | 3 | **description** | Text | Si | Descripcion detallada del producto | "BOMB LED G" |
 | 4 | **category** | String | Si | Categoria del producto | "Iluminacion" |
 | 5 | **price1** | Decimal | Si | Precio para cantidad 1 (generalmente unidad) | 12 |
@@ -41,12 +40,12 @@ Antes de importar el CSV, el administrador debe subir las imagenes al sistema. E
 
 ```
 Paso 1: Subir imagenes al sistema (Modulo de Imagenes)
-        El nombre del archivo de cada imagen debe ser igual al Name del producto.
-        Ejemplo: producto con Name "001lampara" -> subir "001lampara.jpg"
+        El nombre del archivo de cada imagen debe ser igual al code del producto.
+        Ejemplo: producto con code "GE-75003WW" -> subir "GE-75003WW.jpg"
         |
         v
 Paso 2: Importar el archivo CSV (Modulo de Productos)
-        El sistema lee la columna Name de cada fila y busca automaticamente
+        El sistema lee la columna code de cada fila y busca automaticamente
         la imagen con ese mismo nombre en la galeria.
         |
         v
@@ -55,19 +54,22 @@ Paso 3: Revisar el reporte de importacion
 ```
 
 **Convencion de nombres para archivos de imagen:**
-- El nombre del archivo (sin extension) debe corresponder al valor del campo `Name` en el CSV
+- El nombre del archivo (sin extension) debe corresponder al valor del campo `code` en el CSV
 - La comparacion es **insensible a mayusculas/minusculas (case-insensitive)**: el sistema convierte ambos a minusculas antes de comparar
 - Extensiones aceptadas: `.jpg`, `.jpeg`, `.png`, `.webp`
+- Los codigos pueden contener guiones, numeros y letras; todos son validos como nombres de archivo
 
 Ejemplos validos:
 
-| Name en CSV | Nombre de archivo de imagen | Resultado |
+| code en CSV | Nombre de archivo de imagen | Resultado |
 |-------------|----------------------------|-----------|
-| 001lampara | 001lampara.jpg | Vincula |
-| 001lampara | 001Lampara.jpg | Vincula (case-insensitive) |
-| 001lampara | 001LAMPARA.PNG | Vincula (case-insensitive) |
-| GE-75003WM-bombilla | GE-75003WM-bombilla.png | Vincula |
-| tuberiaA12 | tuberiaa12.webp | Vincula (case-insensitive) |
+| GE-75003WW | GE-75003WW.jpg | Vincula |
+| GE-75003WW | ge-75003ww.jpg | Vincula (case-insensitive) |
+| GE-75003WW | GE-75003WW.PNG | Vincula (case-insensitive) |
+| 18258-119 | 18258-119.jpg | Vincula |
+| JT-FYTJGK-500WW | JT-FYTJGK-500WW.webp | Vincula |
+| 7186 | 7186.png | Vincula |
+| 2 | 2.jpg | Vincula |
 
 ---
 
@@ -76,15 +78,15 @@ Ejemplos validos:
 ### Estructura Actual (11 columnas, sin columna image)
 ```csv
 Name,code,description,category,price1,price2,price3,price4,price5,price6,Stock Quality
-001lampara,GE-75003WM,BOMB LED G,Iluminacion,12,36.84,24,33.15,48,29.47,208
+Bombilla LED 75W,GE-75003WW,BOMB LED G,Iluminacion,12,36.84,24,33.15,48,29.47,208
 ```
 
 ### Vista Estructurada
 
 | Campo | Valor |
 |-------|-------|
-| Name | 001lampara |
-| code | GE-75003WM |
+| Name | Bombilla LED 75W |
+| code | GE-75003WW |
 | description | BOMB LED G |
 | category | Iluminacion |
 | price1 | 12 |
@@ -95,7 +97,7 @@ Name,code,description,category,price1,price2,price3,price4,price5,price6,Stock Q
 | price6 | 29.47 |
 | Stock Quality | 208 |
 
-La imagen de este producto debera haberse subido previamente con el nombre `001lampara.jpg` (o `.png` / `.webp`).
+La imagen de este producto debera haberse subido previamente con el nombre `GE-75003WW.jpg` (o `.png` / `.webp`).
 
 ---
 
@@ -137,7 +139,7 @@ Integer:  Stock Quality
 - Formato: numeros con hasta 2 decimales
 
 ### 6. Imagen (Advertencia, no error critico)
-- El sistema busca en la galeria una imagen cuyo nombre sin extension coincida con el campo `Name`
+- El sistema busca en la galeria una imagen cuyo nombre sin extension coincida con el campo `code`
 - Si no encuentra imagen, registra advertencia y el producto se importa sin imagen
 - Si encuentra coincidencia, la vincula automaticamente al producto
 
@@ -151,7 +153,7 @@ Integer:  Stock Quality
 ### Flujo de Importacion
 
 ```
-1. Administrador sube las imagenes (nombres = Name de los productos)
+1. Administrador sube las imagenes (nombres = code de los productos)
    |
    v
 2. Administrador sube el archivo CSV
@@ -167,7 +169,7 @@ Integer:  Stock Quality
    - Validar campos obligatorios presentes
    - Validar tipos de datos
    - Validar codigo unico
-   - Buscar imagen con nombre = Name del producto
+   - Buscar imagen con nombre = code del producto
      Si encuentra: vincular imagen al producto
      Si no encuentra: registrar advertencia
    |
@@ -218,7 +220,7 @@ Integer:  Stock Quality
 
 | Advertencia | Descripcion |
 |-------------|-------------|
-| Imagen no encontrada | No existe imagen con nombre igual al Name del producto |
+| Imagen no encontrada | No existe imagen con nombre igual al code del producto |
 | Codigo duplicado | El code ya existe; el sistema pide confirmacion |
 | Precio2-6 con valor no numerico | Campo opcional con formato incorrecto; se omite ese precio |
 
@@ -242,8 +244,8 @@ Al exportar productos del sistema, el archivo tendra la misma estructura de 11 c
 
 ```csv
 Name,code,description,category,price1,price2,price3,price4,price5,price6,Stock Quality
-Producto1,ABC-001,Descripcion 1,Categoria A,10.50,9.80,9.50,9.20,9.00,8.80,150
-Producto2,ABC-002,Descripcion 2,Categoria B,20.00,,,,,, 100
+Bombilla LED 75W,GE-75003WW,Descripcion 1,Iluminacion,10.50,9.80,9.50,9.20,9.00,8.80,150
+Caja de Interruptor,18258-119,Descripcion 2,Electrico,20.00,,,,,, 100
 ```
 
 Campos vacios se dejan sin valor (comas consecutivas).
@@ -285,11 +287,12 @@ function validateCSVRow(row, rowNumber, imageGallery) {
     warnings.push(`Fila ${rowNumber}: codigo ${row.code} ya existe, se pedira confirmacion`);
   }
 
+  // La vinculacion de imagen se realiza por el campo code, no por Name
   const imageFound = imageGallery.find(
-    img => img.nameWithoutExtension.toLowerCase() === row.Name.toLowerCase()
+    img => img.nameWithoutExtension.toLowerCase() === row.code.toLowerCase()
   );
   if (!imageFound) {
-    warnings.push(`Fila ${rowNumber}: no se encontro imagen con nombre "${row.Name}", producto importado sin imagen`);
+    warnings.push(`Fila ${rowNumber}: no se encontro imagen con nombre "${row.code}", producto importado sin imagen`);
   }
 
   return {
@@ -311,16 +314,18 @@ function validateCSVRow(row, rowNumber, imageGallery) {
 | 1 | CSV de 11 columnas con datos validos e imagenes subidas | Importacion exitosa con imagenes vinculadas |
 | 2 | CSV de 12 columnas (con columna image del formato antiguo) | Error critico: formato antiguo no valido |
 | 3 | CSV sin encabezado | Error critico |
-| 4 | CSV con Name que tiene imagen subida con mismo nombre | Producto importado con imagen vinculada |
-| 5 | CSV con Name sin imagen correspondiente en galeria | Producto importado sin imagen, advertencia mostrada |
+| 4 | CSV con code que tiene imagen subida con mismo nombre | Producto importado con imagen vinculada |
+| 5 | CSV con code sin imagen correspondiente en galeria | Producto importado sin imagen, advertencia mostrada |
 | 6 | Fila con code duplicado | Advertencia, preguntar al usuario |
 | 7 | Fila con price1 vacio | Fila invalida |
 | 8 | Fila con price2-6 vacios | Fila valida (precios opcionales) |
 | 9 | CSV con 4,000 filas | Importacion completa en menos de 30 segundos |
 | 10 | CSV con caracteres especiales (n, a, e con tildes) | Importacion correcta (UTF-8) |
-| 11 | Imagen duplicada en galeria (mismo nombre dos veces) | Alerta al Admin, se usa la mas reciente |
+| 11 | Imagen subida con nombre igual al code (ej: "GE-75003WW.jpg") | Se vincula al producto con code "GE-75003WW" |
+| 12 | code con guiones (ej: "18258-119") | Vinculacion correcta con imagen "18258-119.jpg" |
+| 13 | code muy corto (ej: "2") | Vinculacion correcta con imagen "2.jpg" |
 
 ---
 
-**Ultima actualizacion:** 20 de febrero de 2026
-**Version:** 2.0 (columna image eliminada, vinculacion automatica por nombre)
+**Ultima actualizacion:** 24 de mayo de 2026
+**Version:** 3.0 (vinculacion automatica cambiada de campo Name a campo code)

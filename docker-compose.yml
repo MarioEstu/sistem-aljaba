@@ -1,0 +1,32 @@
+version: '3.9'
+
+# ============================================================
+# SOLO PARA DESARROLLO LOCAL
+# En producción usa un servidor PostgreSQL real con credenciales
+# seguras configuradas en variables de entorno del servidor.
+# Las credenciales de aquí son exclusivamente para el entorno
+# Docker local de desarrollo y NO deben usarse en producción.
+# ============================================================
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: catalog_aljaba_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-aljaba}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme_local_only}
+      POSTGRES_DB: ${POSTGRES_DB:-catalog_aljaba}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-aljaba} -d ${POSTGRES_DB:-catalog_aljaba}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+    driver: local
