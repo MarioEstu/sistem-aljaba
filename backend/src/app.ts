@@ -25,10 +25,17 @@ app.use(cors({
 }))
 
 // ---- Rate limiting ----
-app.use('/api/auth', rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 min
-  max: 20,                   // máx 20 intentos de login por ventana
+// Estricto solo para login (brute-force protection)
+app.use('/api/auth/login', rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
   message: { message: 'Demasiados intentos. Intenta de nuevo en 15 minutos.' },
+}))
+// Permisivo para /me (llamado en cada mount de AdminLayout/GuestLayout)
+app.use('/api/auth/me', rateLimit({
+  windowMs: 60 * 1000,
+  max: 60,
+  message: { message: 'Demasiados intentos. Intenta de nuevo.' },
 }))
 
 app.use(rateLimit({

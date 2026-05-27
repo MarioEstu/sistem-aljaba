@@ -6,7 +6,7 @@ import { Prisma } from '@prisma/client'
 export const productCreateSchema = z.object({
   name:        z.string().min(1).max(255),
   code:        z.string().min(1).max(100),
-  description: z.string().optional().nullable(),
+  description: z.string().max(5000).optional().nullable(),
   categoryId:  z.string().uuid().optional().nullable(),
   price1:      z.number().positive().optional().nullable(),
   price2:      z.number().positive().optional().nullable(),
