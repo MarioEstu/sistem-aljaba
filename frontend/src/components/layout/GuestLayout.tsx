@@ -1,10 +1,20 @@
+import { useEffect } from 'react'
 import { Outlet, Navigate, useNavigate } from 'react-router-dom'
 import { LogOut, User as UserIcon } from 'lucide-react'
 import { useAuthStore } from '@/store/auth.store'
+import { authService } from '@/services/auth.service'
 
 export default function GuestLayout() {
-  const { isAuthenticated, user, logout } = useAuthStore()
+  const { isAuthenticated, user, logout, setUser } = useAuthStore()
   const navigate = useNavigate()
+
+  // Refresh user data from server on mount to fix stale names stored in localStorage
+  useEffect(() => {
+    if (isAuthenticated) {
+      authService.me().then(setUser).catch(() => {})
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />

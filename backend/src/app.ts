@@ -36,6 +36,17 @@ app.use(rateLimit({
   max: 5000,
 }))
 
+// ---- Request timeout (30 s) — skip PDF jobs which run async and can take minutes ----
+app.use((req, res, next) => {
+  if (req.path.startsWith('/api/pdf-jobs')) return next()
+  res.setTimeout(30_000, () => {
+    if (!res.headersSent) {
+      res.status(503).json({ message: 'Tiempo de espera agotado. Intenta de nuevo.' })
+    }
+  })
+  next()
+})
+
 // ---- Body parsing ----
 app.use(express.json({ limit: '10mb' }))
 app.use(express.urlencoded({ extended: true }))

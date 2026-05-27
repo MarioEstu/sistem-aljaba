@@ -3,7 +3,7 @@
    Basados en el wireframe design system
    ================================================ */
 
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap");
 
 :root {
   /* Neutrals */
@@ -69,6 +69,73 @@
   --shadow-sm:  0 1px 3px rgba(31,30,26,.08);
 
   /* Layout */
-  --sidebar-width: 220px;
-  --topbar-height: 52px;
+  --sidebar-width:     220px;
+  --sidebar-collapsed: 56px;
+  --topbar-height:     52px;
+
+  /* Animaciones */
+  --ease-ui:    cubic-bezier(.4, 0, .2, 1);
+  --dur-fast:   140ms;
+  --dur-normal: 220ms;
+  --dur-slow:   350ms;
+
+  /* Gradientes */
+  --hero-gradient:   linear-gradient(135deg, #1F1E1A 0%, #2d2c28 45%, #3b2620 100%);
+  --accent-gradient: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+
+  /* Catálogos — light mode */
+  --catalog-cover-gradient: linear-gradient(140deg, #7B2A1A 0%, #C4452C 55%, #CC4820 100%);
+  --catalog-cover-overlay:  radial-gradient(ellipse 70% 55% at 15% 10%, rgba(255,255,255,.18) 0%, transparent 65%);
+
+  --card-hover-shadow: 0 4px 6px -1px rgba(31,30,26,.08), 0 12px 32px -8px rgba(31,30,26,.16);
+}
+
+/* ================================================
+   Modo oscuro — Dark theme overrides
+   Se activa con data-theme="dark" en el <html>
+   ================================================ */
+
+[data-theme="dark"] {
+  /* Neutrals — tonos cálidos oscuros */
+  --paper:       #1C1B17;
+  --paper-2:     #252420;
+  --paper-3:     #2E2D29;
+  --line-soft:   #3D3B35;
+  --line:        #4A4840;
+  --line-strong: #6B6960;
+  --ink-3:       #686660;
+  --ink-2:       #9B9890;
+  --ink-1:       #E4E2DA;
+
+  /* Accent — tints más oscuros en dark */
+  --accent-soft: #6B2A1D;
+  --accent-tint: #3B1E19;
+
+  /* Funcionales — ajustados para legibilidad en oscuro */
+  --ok:          #5CA06A;
+  --ok-tint:     #1E3025;
+  --warn:        #C8A030;
+  --warn-tint:   #302710;
+  --danger:      #D4524A;
+  --danger-tint: #3A1A18;
+
+  /* Semánticos */
+  --bg:          var(--paper);
+  --bg-surface:  #252420;
+  --bg-muted:    var(--paper-3);
+  --bg-hover:    #363430;
+  --border:      var(--line);
+  --border-soft: var(--line-soft);
+
+  /* Sombras — más pronunciadas en dark */
+  --shadow-pop: 0 2px 0 rgba(0,0,0,.25), 0 8px 24px -8px rgba(0,0,0,.5);
+  --shadow-sm:  0 1px 3px rgba(0,0,0,.3);
+  --card-hover-shadow: 0 4px 6px -1px rgba(0,0,0,.25), 0 12px 32px -8px rgba(0,0,0,.5);
+
+  /* Gradiente hero oscuro */
+  --hero-gradient: linear-gradient(135deg, #0E0D0B 0%, #1C1B17 45%, #2C1610 100%);
+
+  /* Cubierta de catálogos — dark mode */
+  --catalog-cover-gradient: linear-gradient(140deg, #1A1410 0%, #2A1C14 50%, #3A1E10 100%);
+  --catalog-cover-overlay:  radial-gradient(ellipse 80% 60% at 80% 0%, rgba(196,69,44,.28) 0%, transparent 70%);
 }

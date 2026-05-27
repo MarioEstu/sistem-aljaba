@@ -55,6 +55,11 @@ function normalizeHeader(h: string): string {
   return h.toLowerCase().trim()
 }
 
+/** Normaliza un código/nombre de archivo para la comparación: minúsculas, _ y - son equivalentes */
+function normalizeKey(s: string): string {
+  return s.toLowerCase().replace(/_/g, '-')
+}
+
 /** Detecta automáticamente el delimitador leyendo la primera línea del buffer */
 function detectDelimiter(buffer: Buffer): string {
   const firstLine = buffer.toString('utf8').split('\n')[0] ?? ''
@@ -95,11 +100,11 @@ export async function parseCsvPreview(buffer: Buffer): Promise<CsvPreviewResult>
     prisma.product.findMany({ select: { code: true } }),
   ])
 
-  // Mapas para búsqueda rápida
+  // Mapas para búsqueda rápida (normaliza _ y - como equivalentes)
   const imageMap = new Map(
-    images.map((img) => [img.filename.replace(/\.[^.]+$/, '').toLowerCase(), img.id]),
+    images.map((img) => [normalizeKey(img.filename.replace(/\.[^.]+$/, '')), img.id]),
   )
-  const existingCodes = new Set(existingProducts.map((p) => p.code.toLowerCase()))
+  const existingCodes = new Set(existingProducts.map((p) => normalizeKey(p.code)))
 
   // 4. Procesar filas
   const rows: CsvRowResult[] = []
@@ -132,20 +137,20 @@ export async function parseCsvPreview(buffer: Buffer): Promise<CsvPreviewResult>
 
     // Código duplicado dentro del mismo CSV
     let status: CsvRowResult['status'] = 'ok'
-    if (code && seenCodes.has(code.toLowerCase())) {
+    if (code && seenCodes.has(normalizeKey(code))) {
       errors.push(`Código duplicado en el CSV: "${code}"`)
       status = 'error'
     }
-    if (code) seenCodes.add(code.toLowerCase())
+    if (code) seenCodes.add(normalizeKey(code))
 
-    const existsInDb = code ? existingCodes.has(code.toLowerCase()) : false
+    const existsInDb = code ? existingCodes.has(normalizeKey(code)) : false
     if (existsInDb && status !== 'error') {
       status = 'duplicate'
       warnings.push('Este código ya existe en la base de datos (se sobreescribirá)')
     }
 
     const imageFound = code
-      ? imageMap.has(code.toLowerCase())
+      ? imageMap.has(normalizeKey(code))
       : false
     if (!imageFound && code) {
       warnings.push(`Sin imagen vinculada para el código "${code}"`)
@@ -182,8 +187,8 @@ export async function importCsvRows(
     prisma.image.findMany({ select: { id: true, filename: true } }),
     prisma.product.findMany({ select: { id: true, code: true } }),
   ])
-  const imageMap   = new Map(images.map((img) => [img.filename.replace(/\.[^.]+$/, '').toLowerCase(), img.id]))
-  const codeToId   = new Map(existing.map((p) => [p.code.toLowerCase(), p.id]))
+  const imageMap   = new Map(images.map((img) => [normalizeKey(img.filename.replace(/\.[^.]+$/, '')), img.id]))
+  const codeToId   = new Map(existing.map((p) => [normalizeKey(p.code), p.id]))
 
   for (const row of rows) {
     if (row.status === 'error') { errors++; continue }
@@ -195,7 +200,7 @@ export async function importCsvRows(
         : null
 
       const imageId = row.code
-        ? (imageMap.get(row.code.toLowerCase()) ?? null)
+        ? (imageMap.get(normalizeKey(row.code)) ?? null)
         : null
 
       const data = {
@@ -214,7 +219,7 @@ export async function importCsvRows(
       }
 
       if (row.existsInDb && overwriteDuplicates) {
-        const existingId = codeToId.get(row.code.toLowerCase())!
+        const existingId = codeToId.get(normalizeKey(row.code))!
         await prisma.product.update({ where: { id: existingId }, data })
       } else {
         await prisma.product.create({ data })

@@ -1,6 +1,6 @@
 import { prisma } from '../config/database'
 import { z } from 'zod'
-import type { Prisma } from '@prisma/client'
+import { Prisma } from '@prisma/client'
 
 // ---- Schemas ----
 export const productCreateSchema = z.object({
@@ -100,8 +100,30 @@ export const productsService = {
     })
   },
 
-  async create(data: z.infer<typeof productCreateSchema>) {
-    return prisma.product.create({ data: data as Prisma.ProductCreateInput })
+  async create(raw: z.infer<typeof productCreateSchema>) {
+    const data: Prisma.ProductCreateInput = raw as Prisma.ProductCreateInput
+
+    // Auto-vincular imagen si el code coincide con el baseName de una imagen existente
+    // y no se especificó imageId explícitamente.
+    if (!raw.imageId && raw.code) {
+      const codeAlt = raw.code.includes('-')
+        ? raw.code.replace(/-/g, '_')   // "FD-30" → "FD_30"
+        : raw.code.replace(/_/g, '-')   // "FD_30" → "FD-30"
+      const matchingImage = await prisma.image.findFirst({
+        where: {
+          OR: [
+            { filename: { startsWith: `${raw.code}.`, mode: 'insensitive' } },
+            { filename: { startsWith: `${codeAlt}.`,  mode: 'insensitive' } },
+          ],
+        },
+        orderBy: { createdAt: 'desc' },
+      })
+      if (matchingImage) {
+        (data as Record<string, unknown>).imageId = matchingImage.id
+      }
+    }
+
+    return prisma.product.create({ data })
   },
 
   async update(id: string, data: z.infer<typeof productUpdateSchema>) {
@@ -123,27 +145,22 @@ export const productsService = {
         })
 
       case 'applyDiscount': {
-        // Aplica descuento % a price1..6 (solo los que no sean null)
-        const products = await prisma.product.findMany({ where: { id: { in: action.ids } } })
-        const factor = 1 - action.percent / 100
-        const applyFactor = (v: unknown) =>
-          v != null ? Math.round(Number(v) * factor * 100) / 100 : null
-        await Promise.all(
-          products.map((p) =>
-            prisma.product.update({
-              where: { id: p.id },
-              data: {
-                price1: applyFactor(p.price1),
-                price2: applyFactor(p.price2),
-                price3: applyFactor(p.price3),
-                price4: applyFactor(p.price4),
-                price5: applyFactor(p.price5),
-                price6: applyFactor(p.price6),
-              },
-            }),
-          ),
-        )
-        return { count: products.length }
+        // Single SQL UPDATE for all selected products — O(1) round-trips regardless of selection size.
+        // NULL prices stay NULL (NULL * factor = NULL in PostgreSQL).
+        // Note: Prisma maps Product model → "products" table (snake_case, lowercase).
+        const factor = (100 - action.percent) / 100
+        await prisma.$executeRaw`
+          UPDATE "products"
+          SET
+            "price1" = ROUND(CAST("price1" * ${factor} AS NUMERIC), 2),
+            "price2" = ROUND(CAST("price2" * ${factor} AS NUMERIC), 2),
+            "price3" = ROUND(CAST("price3" * ${factor} AS NUMERIC), 2),
+            "price4" = ROUND(CAST("price4" * ${factor} AS NUMERIC), 2),
+            "price5" = ROUND(CAST("price5" * ${factor} AS NUMERIC), 2),
+            "price6" = ROUND(CAST("price6" * ${factor} AS NUMERIC), 2)
+          WHERE "id" IN (${Prisma.join(action.ids)})
+        `
+        return { count: action.ids.length }
       }
 
       case 'updateStock':

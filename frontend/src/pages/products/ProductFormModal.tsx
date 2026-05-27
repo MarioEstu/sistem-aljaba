@@ -62,7 +62,8 @@ export default function ProductFormModal({ product, onClose }: Props) {
   const update = useUpdateProduct()
   const uploadImage = useUploadImages()
   const { data: categories = [] } = useCategoriesFlat()
-  const { data: imagesData } = useImages({ page: 1, limit: 100 })
+  // Carga hasta 1500 imágenes para cubrir galerías grandes (el sistema puede tener >1000)
+  const { data: imagesData } = useImages({ page: 1, limit: 1500 })
   const uploadRef = useRef<HTMLInputElement>(null)
   const [selectedImageId, setSelectedImageId] = useState<string>(product?.imageId ?? '')
   const defaultValues = {
@@ -82,7 +83,29 @@ export default function ProductFormModal({ product, onClose }: Props) {
   const { register, handleSubmit, formState: { errors, isSubmitting } } =
     useForm<FormData>({ resolver: zodResolver(schema), defaultValues })
 
-  const images = useMemo(() => imagesData?.data ?? [], [imagesData])
+  const images = useMemo(() => {
+    const list = imagesData?.data ?? []
+    // Si el producto ya tiene imagen vinculada pero no está en la página cargada,
+    // la añadimos manualmente para que aparezca seleccionada en el dropdown.
+    if (
+      product?.imageId &&
+      product.image &&
+      !list.some((img) => img.id === product.imageId)
+    ) {
+      list.unshift({
+        id:           product.imageId,
+        filename:     product.image.filename ?? '',
+        baseName:     product.image.filename?.replace(/\.[^.]+$/, '') ?? '',
+        url:          product.image.url ?? '',
+        thumbnailUrl: product.image.thumbnailUrl ?? null,
+        usageCount:   1,
+        linkedProducts: [],
+        createdAt:    new Date().toISOString(),
+      } as typeof list[0])
+    }
+    return list
+  }, [imagesData, product])
+
   const selectedImage = useMemo(
     () => images.find((image) => image.id === selectedImageId),
     [images, selectedImageId],

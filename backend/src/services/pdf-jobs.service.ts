@@ -42,19 +42,32 @@ async function imageUrlToBase64(relUrl: string): Promise<string | null> {
   }
 }
 
+const PDF_CONCURRENCY = 20 // parallel file reads for image embedding
+
 async function buildImageMap(entries: CatalogProductEntry[]): Promise<Map<string, string>> {
-  const map = new Map<string, string>()
+  // 1. Collect all unique URLs (avoids reading the same file twice)
+  const uniqueUrls = new Set<string>()
   for (const entry of entries) {
     for (const img of [entry.imageOverride, entry.product.image]) {
       if (!img) continue
       for (const url of [img.thumbnailUrl, img.url]) {
-        if (url && !map.has(url)) {
-          const b64 = await imageUrlToBase64(url)
-          if (b64) map.set(url, b64)
-        }
+        if (url) uniqueUrls.add(url)
       }
     }
   }
+
+  // 2. Load in parallel batches (sequential file I/O was the bottleneck for large catalogs)
+  const map = new Map<string, string>()
+  const urlArray = Array.from(uniqueUrls)
+  for (let i = 0; i < urlArray.length; i += PDF_CONCURRENCY) {
+    const batch = urlArray.slice(i, i + PDF_CONCURRENCY)
+    const results = await Promise.all(batch.map((url) => imageUrlToBase64(url)))
+    batch.forEach((url, idx) => {
+      const b64 = results[idx]
+      if (b64) map.set(url, b64)
+    })
+  }
+
   return map
 }
 
@@ -122,6 +135,12 @@ async function loadCatalogForPdf(catalogId: string): Promise<Catalog> {
   return catalog as unknown as Catalog
 }
 
+// ── Safety limits ─────────────────────────────────────────────────────────────
+// A catalog with thousands of products + embedded base64 images can generate
+// hundreds of MB of HTML, potentially crashing Puppeteer or the Node process.
+// PDF_MAX_PRODUCTS sets a hard cap; override via env var for specific deployments.
+const PDF_MAX_PRODUCTS = parseInt(process.env.PDF_MAX_PRODUCTS ?? '2000', 10)
+
 // ── Default config fallback ───────────────────────────────────────────────────
 const DEFAULT_CFG: CatalogConfig = {
   layout:          'grid4',
@@ -162,6 +181,14 @@ async function processNext() {
     const catalog  = await loadCatalogForPdf(job.catalogId)
     const config   = mergeConfig(catalog.config)
     const entries  = catalog.products
+
+    // Guard against catalogs too large for PDF generation
+    if (entries.length > PDF_MAX_PRODUCTS) {
+      throw new Error(
+        `El catálogo tiene ${entries.length} productos. El límite para PDF es ${PDF_MAX_PRODUCTS} productos. ` +
+        `Ajusta PDF_MAX_PRODUCTS en las variables de entorno si necesitas un límite mayor.`,
+      )
+    }
 
     // Embed product images as base64 so Puppeteer needs no network requests
     const imageMap = await buildImageMap(entries)
@@ -237,7 +264,7 @@ export const pdfJobsService = {
     return prisma.pdfJob.findMany({
       where:   catalogId ? { catalogId } : {},
       orderBy: { createdAt: 'desc' },
-      take:    100,
+      take:    500,
       include: {
         catalog:   { select: { id: true, name: true, slug: true, pdfUrl: true } },
         requester: { select: { id: true, username: true, name: true } },

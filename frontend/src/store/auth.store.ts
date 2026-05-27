@@ -7,6 +7,7 @@ interface AuthState {
   user: User | null
   isAuthenticated: boolean
   setAuth: (token: string, user: User) => void
+  setUser: (user: User) => void
   logout: () => void
 }
 
@@ -21,6 +22,8 @@ export const useAuthStore = create<AuthState>()(
         localStorage.setItem('aljaba_token', token)
         set({ token, user, isAuthenticated: true })
       },
+
+      setUser: (user) => set({ user }),
 
       logout: () => {
         localStorage.removeItem('aljaba_token')

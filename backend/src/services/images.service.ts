@@ -19,7 +19,7 @@ const imagesQuerySchema = z.object({
   startDate: z.string().optional(),
   endDate: z.string().optional(),
   page: z.coerce.number().int().min(1).default(1),
-  limit: z.coerce.number().int().min(1).max(100).default(24),
+  limit: z.coerce.number().int().min(1).max(2000).default(24),
   unlinkedOnly: z.coerce.boolean().optional(),
 })
 
@@ -229,10 +229,18 @@ async function upsertSingleImage(file: Express.Multer.File) {
   const filenames = buildStoragePaths(baseName, resolveOutputFormat(file.mimetype))
   const originalFilename = `${baseName}${processed.extension}`
 
-  const existing = await prisma.image.findMany({
+  // Single indexed lookup instead of loading all images into memory (O(log N) vs O(N))
+  const match = await prisma.image.findFirst({
+    where: {
+      OR: [
+        { filename: { equals: `${baseName}.jpg`,  mode: 'insensitive' } },
+        { filename: { equals: `${baseName}.jpeg`, mode: 'insensitive' } },
+        { filename: { equals: `${baseName}.png`,  mode: 'insensitive' } },
+        { filename: { equals: `${baseName}.webp`, mode: 'insensitive' } },
+      ],
+    },
     select: { id: true, filename: true, s3Key: true, thumbnailUrl: true, url: true },
   })
-  const match = existing.find((image) => normalizeBaseName(image.filename) === baseName.toLowerCase())
 
   await uploadToStorage(filenames.imageKey, processed.buffer, processed.contentType)
   await uploadToStorage(filenames.thumbnailKey, processed.thumbnailBuffer, 'image/jpeg')
@@ -269,10 +277,16 @@ async function upsertSingleImage(file: Express.Multer.File) {
           },
         })
 
+    // Vincula productos cuyo código coincide con el baseName del archivo,
+    // tratando _ y - como equivalentes (ej: "FD_30.png" vincula a código "FD-30").
+    const baseNormalized = baseName.replace(/_/g, '-')
     const linked = await prisma.product.updateMany({
       where: {
         imageId: null,
-        name: { equals: baseName, mode: 'insensitive' },
+        OR: [
+          { code: { equals: baseName,       mode: 'insensitive' } },
+          { code: { equals: baseNormalized, mode: 'insensitive' } },
+        ],
       },
       data: { imageId: saved.id },
     })

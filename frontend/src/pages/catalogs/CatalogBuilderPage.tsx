@@ -10,6 +10,7 @@ import {
   usePublishCatalog, useUnpublishCatalog, useUpdateCatalog,
 } from '@/hooks/useCatalogs'
 import { useProducts } from '@/hooks/useProducts'
+import { productsService } from '@/services/products.service'
 import { useImages } from '@/hooks/useImages'
 import { useCategoriesFlat } from '@/hooks/useCategories'
 import { useCreatePdfJob } from '@/hooks/usePdfJobs'
@@ -191,9 +192,10 @@ export default function CatalogBuilderPage() {
   const createPdfJob  = useCreatePdfJob()
 
   // Product search for left panel
-  const [search,     setSearch]     = useState('')
-  const [categoryId, setCategoryId] = useState('')
-  const [showConfig, setShowConfig] = useState(false)
+  const [search,       setSearch]       = useState('')
+  const [categoryId,   setCategoryId]   = useState('')
+  const [showConfig,   setShowConfig]   = useState(false)
+  const [isAddingAll,  setIsAddingAll]  = useState(false)
 
   const { data: productsData } = useProducts({ search, categoryId: categoryId || undefined, limit: 50 })
   const { data: imagesData }   = useImages({ page: 1, limit: 200 })
@@ -229,6 +231,12 @@ export default function CatalogBuilderPage() {
     [allProducts, inCatalogIds],
   )
 
+  // Products in the panel that actually have an image (eligible for bulk-add)
+  const addableProducts = useMemo(
+    () => availableProducts.filter((p) => p.image != null),
+    [availableProducts],
+  )
+
   // ── Drag & Drop ──────────────────────────────────────────────────────────────
 
   const dragIdx = useRef<number | null>(null)
@@ -262,6 +270,29 @@ export default function CatalogBuilderPage() {
 
   const handleAdd = async (product: Product) => {
     await addProducts.mutateAsync({ catalogId: id, productIds: [product.id] })
+  }
+
+  const handleAddAll = async () => {
+    setIsAddingAll(true)
+    try {
+      // Fetch ALL matching products (not just the 50 visible in the panel) so bulk-add is complete
+      const result = await productsService.list({
+        search: search || undefined,
+        categoryId: categoryId || undefined,
+        limit: 1200,
+        page: 1,
+      })
+      const eligible = result.data.filter(
+        (p) => p.image != null && !inCatalogIds.has(p.id),
+      )
+      if (eligible.length === 0) return
+      await addProducts.mutateAsync({
+        catalogId: id,
+        productIds: eligible.map((p) => p.id),
+      })
+    } finally {
+      setIsAddingAll(false)
+    }
   }
 
   const handleRemove = async (productId: string) => {
@@ -381,8 +412,19 @@ export default function CatalogBuilderPage() {
 
         {/* Left: Add products */}
         <div className="card" style={{ height: 'fit-content' }}>
-          <div style={{ padding: '12px 14px', borderBottom: '1px solid var(--border)', fontWeight: 600 }}>
-            Agregar productos
+          <div style={{ padding: '12px 14px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span style={{ fontWeight: 600 }}>Agregar productos</span>
+            {addableProducts.length > 0 && (
+              <button
+                className="btn primary sm"
+                style={{ fontSize: 11, padding: '3px 8px' }}
+                disabled={isAddingAll || addProducts.isPending}
+                onClick={handleAddAll}
+                title="Agregar todos los productos con imagen del filtro actual"
+              >
+                + Agregar todos ({addableProducts.length}{addableProducts.length === 50 ? '+' : ''})
+              </button>
+            )}
           </div>
           <div style={{ padding: '10px 12px', borderBottom: '1px solid var(--border)' }}>
             <div style={{ position: 'relative', marginBottom: 8 }}>
@@ -416,37 +458,45 @@ export default function CatalogBuilderPage() {
                   : 'Todos los productos ya están en el catálogo.'}
               </div>
             ) : (
-              availableProducts.map((product) => (
-                <div
-                  key={product.id}
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: 8,
-                    padding: '7px 12px',
-                    borderBottom: '1px solid var(--border-soft)',
-                  }}
-                >
-                  <ProductThumb
-                    url={product.image?.thumbnailUrl ?? product.image?.url}
-                    size={32}
-                  />
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {product.name}
-                    </div>
-                    <div style={{ fontSize: 11, color: 'var(--fg-subtle)', fontFamily: 'var(--font-mono)' }}>
-                      {product.code}
-                    </div>
-                  </div>
-                  <button
-                    className="btn primary sm"
-                    style={{ padding: '3px 8px', fontSize: 11 }}
-                    onClick={() => handleAdd(product)}
-                    disabled={addProducts.isPending}
+              availableProducts.map((product) => {
+                const hasImage = product.image != null
+                return (
+                  <div
+                    key={product.id}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 8,
+                      padding: '7px 12px',
+                      borderBottom: '1px solid var(--border-soft)',
+                      opacity: hasImage ? 1 : 0.45,
+                    }}
                   >
-                    <Plus size={12} />
-                  </button>
-                </div>
-              ))
+                    <ProductThumb
+                      url={product.image?.thumbnailUrl ?? product.image?.url}
+                      size={32}
+                    />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {product.name}
+                      </div>
+                      <div style={{ fontSize: 11, color: 'var(--fg-subtle)', fontFamily: 'var(--font-mono)' }}>
+                        {product.code}
+                        {!hasImage && (
+                          <span style={{ marginLeft: 6, color: 'var(--danger)', fontSize: 10 }}>sin imagen</span>
+                        )}
+                      </div>
+                    </div>
+                    <button
+                      className="btn primary sm"
+                      style={{ padding: '3px 8px', fontSize: 11 }}
+                      onClick={() => handleAdd(product)}
+                      disabled={addProducts.isPending || !hasImage}
+                      title={hasImage ? 'Agregar al catálogo' : 'Requiere imagen para agregar al catálogo'}
+                    >
+                      <Plus size={12} />
+                    </button>
+                  </div>
+                )
+              })
             )}
           </div>
         </div>

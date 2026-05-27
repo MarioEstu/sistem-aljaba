@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   BookOpen, Plus, Pencil, Trash2, ExternalLink,
-  Eye, EyeOff, Wrench, X,
+  Eye, EyeOff, Wrench, X, Package,
 } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -22,15 +22,7 @@ const schema = z.object({
 })
 type FormData = z.infer<typeof schema>
 
-// ─── Sub-components ────────────────────────────────────────────────────────────
-
-function StatusPill({ visible }: { visible: boolean }) {
-  return (
-    <span className={`pill ${visible ? 'ok' : 'dim'}`}>
-      {visible ? '● Publicado' : '○ Borrador'}
-    </span>
-  )
-}
+// ─── Inline form modal ─────────────────────────────────────────────────────────
 
 function CatalogFormModal({
   catalog,
@@ -39,14 +31,14 @@ function CatalogFormModal({
   catalog?: Catalog | null
   onClose: () => void
 }) {
-  const isEdit  = !!catalog
-  const create  = useCreateCatalog()
-  const update  = useUpdateCatalog()
+  const isEdit = !!catalog
+  const create = useCreateCatalog()
+  const update = useUpdateCatalog()
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
-      name:        catalog?.name ?? '',
+      name:        catalog?.name        ?? '',
       description: catalog?.description ?? '',
     },
   })
@@ -129,13 +121,108 @@ function CatalogFormModal({
   )
 }
 
+// ─── Catalog Card ──────────────────────────────────────────────────────────────
+
+function CatalogCard({
+  catalog,
+  onEdit,
+  onDelete,
+  onToggleVisibility,
+  publishPending,
+}: {
+  catalog: Catalog
+  onEdit: () => void
+  onDelete: () => void
+  onToggleVisibility: () => void
+  publishPending: boolean
+}) {
+  const navigate = useNavigate()
+  const count    = catalog._count?.products ?? 0
+  const date     = new Date(catalog.updatedAt).toLocaleDateString('es-GT', {
+    day: 'numeric', month: 'short', year: 'numeric',
+  })
+
+  return (
+    <div className="catalog-card">
+      {/* Cover */}
+      <div className="catalog-cover">
+        {/* Status pill */}
+        <span className={`catalog-status-pill ${catalog.guestVisible ? 'ok' : 'dim'}`}>
+          {catalog.guestVisible ? '● Publicado' : '○ Borrador'}
+        </span>
+
+        <div className="catalog-cover-name">{catalog.name}</div>
+        <div className="catalog-cover-slug">/{catalog.slug}</div>
+      </div>
+
+      {/* Body */}
+      <div className="catalog-body">
+        <div className="catalog-meta-row">
+          <span className="catalog-count">
+            <Package size={12} style={{ display: 'inline', marginRight: 4, verticalAlign: 'middle' }} />
+            {count} producto{count !== 1 ? 's' : ''}
+          </span>
+          <span className="catalog-date">{date}</span>
+        </div>
+
+        {catalog.description && (
+          <p className="catalog-desc">{catalog.description}</p>
+        )}
+
+        <div className="catalog-actions">
+          <button
+            className="btn ghost sm"
+            title="Abrir editor"
+            onClick={() => navigate(`/catalogs/${catalog.id}/builder`)}
+          >
+            <Wrench size={13} />
+          </button>
+          <button
+            className="btn ghost sm"
+            title="Editar info"
+            onClick={onEdit}
+          >
+            <Pencil size={13} />
+          </button>
+          <button
+            className="btn ghost sm"
+            title={catalog.guestVisible ? 'Despublicar' : 'Publicar'}
+            onClick={onToggleVisibility}
+            disabled={publishPending}
+          >
+            {catalog.guestVisible ? <EyeOff size={13} /> : <Eye size={13} />}
+          </button>
+          {catalog.guestVisible && (
+            <a
+              href={`/view/${catalog.slug}`}
+              target="_blank"
+              rel="noreferrer"
+              className="btn ghost sm"
+              title="Vista pública"
+            >
+              <ExternalLink size={13} />
+            </a>
+          )}
+          <button
+            className="btn ghost sm"
+            title="Eliminar"
+            onClick={onDelete}
+            style={{ color: 'var(--danger)', marginLeft: 'auto' }}
+          >
+            <Trash2 size={13} />
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ─── Main page ─────────────────────────────────────────────────────────────────
 
 export default function CatalogsPage() {
-  const navigate = useNavigate()
   const { data: catalogs = [], isLoading } = useCatalogs()
-  const deleteMut   = useDeleteCatalog()
-  const publishMut  = usePublishCatalog()
+  const deleteMut    = useDeleteCatalog()
+  const publishMut   = usePublishCatalog()
   const unpublishMut = useUnpublishCatalog()
 
   const [showForm,     setShowForm]     = useState(false)
@@ -159,6 +246,8 @@ export default function CatalogsPage() {
   const openCreate = () => { setEditCatalog(null); setShowForm(true) }
   const openEdit   = (c: Catalog) => { setEditCatalog(c); setShowForm(true) }
 
+  const publishPending = publishMut.isPending || unpublishMut.isPending
+
   return (
     <div className="page">
       {/* Header */}
@@ -167,7 +256,9 @@ export default function CatalogsPage() {
           <div className="crumbs">Admin · Catálogos</div>
           <h1>Catálogos</h1>
           <p className="desc">
-            {isLoading ? '…' : `${catalogs.length} catálogo${catalogs.length !== 1 ? 's' : ''} en el sistema`}
+            {isLoading
+              ? '…'
+              : `${catalogs.length} catálogo${catalogs.length !== 1 ? 's' : ''} en el sistema`}
           </p>
         </div>
         <button className="btn primary" onClick={openCreate}>
@@ -194,93 +285,17 @@ export default function CatalogsPage() {
           </button>
         </div>
       ) : (
-        <div className="card" style={{ overflow: 'auto' }}>
-          <table className="tbl">
-            <thead>
-              <tr>
-                <th>Nombre</th>
-                <th style={{ width: 120 }}>Estado</th>
-                <th style={{ width: 80 }}>Productos</th>
-                <th style={{ width: 130 }}>Creado por</th>
-                <th style={{ width: 120 }}>Actualizado</th>
-                <th style={{ width: 180 }}>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {catalogs.map((catalog) => (
-                <tr key={catalog.id}>
-                  <td>
-                    <div style={{ fontWeight: 600 }}>{catalog.name}</div>
-                    {catalog.description && (
-                      <div className="p-sm" style={{ marginTop: 2 }}>
-                        {catalog.description.length > 60
-                          ? catalog.description.slice(0, 60) + '…'
-                          : catalog.description}
-                      </div>
-                    )}
-                    <div style={{ marginTop: 2, fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--fg-subtle)' }}>
-                      /{catalog.slug}
-                    </div>
-                  </td>
-                  <td><StatusPill visible={catalog.guestVisible} /></td>
-                  <td style={{ textAlign: 'center', fontFamily: 'var(--font-mono)' }}>
-                    {catalog._count?.products ?? 0}
-                  </td>
-                  <td style={{ fontSize: 'var(--fs-sm)' }}>
-                    {catalog.creator?.name ?? catalog.createdBy}
-                  </td>
-                  <td style={{ fontSize: 'var(--fs-sm)', color: 'var(--fg-subtle)' }}>
-                    {new Date(catalog.updatedAt).toLocaleDateString('es-GT')}
-                  </td>
-                  <td>
-                    <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-                      <button
-                        className="btn ghost sm"
-                        title="Abrir editor"
-                        onClick={() => navigate(`/catalogs/${catalog.id}/builder`)}
-                      >
-                        <Wrench size={13} />
-                      </button>
-                      <button
-                        className="btn ghost sm"
-                        title="Editar info"
-                        onClick={() => openEdit(catalog)}
-                      >
-                        <Pencil size={13} />
-                      </button>
-                      <button
-                        className="btn ghost sm"
-                        title={catalog.guestVisible ? 'Despublicar' : 'Publicar'}
-                        onClick={() => toggleVisibility(catalog)}
-                        disabled={publishMut.isPending || unpublishMut.isPending}
-                      >
-                        {catalog.guestVisible ? <EyeOff size={13} /> : <Eye size={13} />}
-                      </button>
-                      {catalog.guestVisible && (
-                        <a
-                          href={`/view/${catalog.slug}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="btn ghost sm"
-                          title="Vista pública"
-                        >
-                          <ExternalLink size={13} />
-                        </a>
-                      )}
-                      <button
-                        className="btn ghost sm"
-                        title="Eliminar"
-                        onClick={() => setDeleteTarget(catalog)}
-                        style={{ color: 'var(--danger)' }}
-                      >
-                        <Trash2 size={13} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="catalog-grid">
+          {catalogs.map((catalog) => (
+            <CatalogCard
+              key={catalog.id}
+              catalog={catalog}
+              onEdit={() => openEdit(catalog)}
+              onDelete={() => setDeleteTarget(catalog)}
+              onToggleVisibility={() => toggleVisibility(catalog)}
+              publishPending={publishPending}
+            />
+          ))}
         </div>
       )}
 
