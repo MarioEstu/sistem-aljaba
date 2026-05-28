@@ -82,14 +82,14 @@ function computeImgHeight(
   const pH = parseFloat(paper.height)   // mm  (e.g. 297)
   const pW = parseFloat(paper.width)    // mm  (e.g. 210)
 
-  // Fixed structural heights (mm)
-  const padTop    = 14
-  const padBot    = 18
-  const padLR     = 14   // each side
-  const headerH   = 24   // header brand + catalog name + padding + margin
-  const footerH   = 9    // footer text + padding
-  const rowGap    = 5
-  const colGap    = 5
+  // Fixed structural heights (mm) — must match .page padding and header/footer CSS below
+  const padTop    = 10
+  const padBot    = 12
+  const padLR     = 12   // each side
+  const headerH   = 18   // header brand + catalog name + reduced margin (no border)
+  const footerH   = 6    // footer text + reduced padding (no border)
+  const rowGap    = 4
+  const colGap    = 4
 
   const gridH = pH - padTop - padBot - headerH - footerH
   const cardH = (gridH - (rows - 1) * rowGap) / rows
@@ -132,7 +132,7 @@ function buildCss(paper: { width: string; height: string }, cols: number, cfg: C
       width: ${paper.width};
       height: ${paper.height};
       overflow: hidden;
-      padding: 14mm 14mm 18mm;
+      padding: 10mm 12mm 12mm;
       page-break-after: always;
       break-after: page;
       display: flex;
@@ -146,19 +146,18 @@ function buildCss(paper: { width: string; height: string }, cols: number, cfg: C
       display: flex;
       justify-content: space-between;
       align-items: flex-end;
-      border-bottom: 2px solid #1a1a18;
-      padding-bottom: 5mm;
-      margin-bottom: 7mm;
+      padding-bottom: 2mm;
+      margin-bottom: 4mm;
     }
-    .header-brand { font-size: 18pt; font-weight: 800; letter-spacing: -0.5px; }
-    .header-meta  { font-size: 9pt; color: #666; text-align: right; line-height: 1.5; }
-    .catalog-name { font-size: 13pt; font-weight: 700; }
+    .header-brand { font-size: 16pt; font-weight: 800; letter-spacing: -0.5px; }
+    .header-meta  { font-size: 8pt; color: #666; text-align: right; line-height: 1.4; }
+    .catalog-name { font-size: 11pt; font-weight: 700; }
 
     /* ── Grid ── */
     .products-grid {
       display: grid;
       grid-template-columns: repeat(${cols}, 1fr);
-      gap: 5mm;
+      gap: 4mm;
       flex: 1;
       align-content: start;
     }
@@ -237,11 +236,10 @@ function buildCss(paper: { width: string; height: string }, cols: number, cfg: C
     /* ── Footer ── */
     .footer {
       margin-top: auto;
-      padding-top: 4mm;
-      border-top: 1px solid #e0dfd8;
+      padding-top: 2mm;
       display: flex;
       justify-content: space-between;
-      font-size: 8pt;
+      font-size: 7.5pt;
       color: #aaa;
     }
   `
