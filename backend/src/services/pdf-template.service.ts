@@ -69,9 +69,53 @@ function defaultPPP(layout: string): number {
 }
 
 // ──────────────────────────────────────────────
+// Compute image height so cards always fit within their row
+// ──────────────────────────────────────────────
+function computeImgHeight(
+  paper: { width: string; height: string },
+  cols: number,
+  cfg: CatalogConfig,
+): number {
+  const ppp  = cfg.productsPerPage || defaultPPP(cfg.layout)
+  const rows = Math.max(1, Math.ceil(ppp / cols))
+
+  const pH = parseFloat(paper.height)   // mm  (e.g. 297)
+  const pW = parseFloat(paper.width)    // mm  (e.g. 210)
+
+  // Fixed structural heights (mm)
+  const padTop    = 14
+  const padBot    = 18
+  const padLR     = 14   // each side
+  const headerH   = 24   // header brand + catalog name + padding + margin
+  const footerH   = 9    // footer text + padding
+  const rowGap    = 5
+  const colGap    = 5
+
+  const gridH = pH - padTop - padBot - headerH - footerH
+  const cardH = (gridH - (rows - 1) * rowGap) / rows
+  const cardW = (pW - 2 * padLR - (cols - 1) * colGap) / cols
+
+  // Estimate text block height (mm) based on enabled fields
+  // Name is always shown (2 lines worst-case)
+  let textH = 5.5   // card info padding (top 2.5 + bottom 3)
+  textH += 8.5      // product-name: 9pt × 2 lines × line-height 1.3
+  textH += 1        // gap
+  if (cfg.showCode)        { textH += 3.5; textH += 1 }  // 7.5pt × 1 line + gap
+  if (cfg.showDescription) { textH += 11;  textH += 1 }  // 7.5pt × 3 lines (clamped) + gap
+  if (cfg.showPrice1)      { textH += 5;   textH += 1 }  // 10pt + margin-top 1.5mm + gap
+  if (cfg.showPrices2to6)  { textH += 3.5; textH += 1 }  // 7pt × 1 line + gap
+  if (cfg.showStock)       { textH += 3.5; textH += 1 }  // 7.5pt × 1 line + gap
+
+  // Image gets whatever remains; clamp between 20mm and cardW (square cap)
+  const imgH = Math.min(cardW, Math.max(cardH - textH, 20))
+  return Math.floor(imgH)
+}
+
+// ──────────────────────────────────────────────
 // CSS
 // ──────────────────────────────────────────────
-function buildCss(paper: { width: string; height: string }, cols: number): string {
+function buildCss(paper: { width: string; height: string }, cols: number, cfg: CatalogConfig): string {
+  const imgH = computeImgHeight(paper, cols, cfg)
   return `
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -137,8 +181,10 @@ function buildCss(paper: { width: string; height: string }, cols: number): strin
     }
     .product-img {
       width: 100%;
-      aspect-ratio: 1;
+      height: ${imgH}mm;
+      flex-shrink: 0;
       object-fit: cover;
+      object-position: center;
       background: #f4f3ef;
       display: block;
     }
@@ -151,7 +197,8 @@ function buildCss(paper: { width: string; height: string }, cols: number): strin
     }
     .product-img-ph {
       width: 100%;
-      aspect-ratio: 1;
+      height: ${imgH}mm;
+      flex-shrink: 0;
       background: #f4f3ef;
       display: flex;
       align-items: center;
@@ -176,7 +223,13 @@ function buildCss(paper: { width: string; height: string }, cols: number): strin
     .product-info.list-info { padding: 0; }
     .product-name  { font-size: 9pt; font-weight: 700; line-height: 1.3; }
     .product-code  { font-size: 7.5pt; color: #888; font-family: monospace; }
-    .product-desc  { font-size: 7.5pt; color: #555; line-height: 1.3; }
+    .product-desc  {
+      font-size: 7.5pt; color: #555; line-height: 1.3;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
     .product-price { font-size: 10pt; font-weight: 700; color: #1a1a18; margin-top: 1.5mm; }
     .product-prices-extra { font-size: 7pt; color: #888; line-height: 1.5; }
     .product-stock { font-size: 7.5pt; color: #555; }
@@ -290,7 +343,7 @@ export function buildCatalogHtml(ctx: RenderContext, baseUrl?: string): string {
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>${safe(catalog.name)}</title>
-  <style>${buildCss(paper, cols)}</style>
+  <style>${buildCss(paper, cols, cfg)}</style>
 </head>
 <body>${pagesHtml}</body>
 </html>`
