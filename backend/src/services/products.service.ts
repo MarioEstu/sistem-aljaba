@@ -24,7 +24,7 @@ export const productsQuerySchema = z.object({
   search:     z.string().optional(),
   categoryId: z.string().optional(),
   page:       z.coerce.number().int().min(1).default(1),
-  limit:      z.coerce.number().int().min(1).max(100).default(50),
+  limit:      z.coerce.number().int().min(1).max(2000).default(50),
   orderBy:    z.enum(['name', 'code', 'price1', 'stock', 'createdAt']).default('name'),
   order:      z.enum(['asc', 'desc']).default('asc'),
   noImage:    z.coerce.boolean().optional(),

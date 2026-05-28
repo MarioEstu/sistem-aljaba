@@ -422,7 +422,7 @@ export default function CatalogBuilderPage() {
                 onClick={handleAddAll}
                 title="Agregar todos los productos con imagen del filtro actual"
               >
-                + Agregar todos ({addableProducts.length}{addableProducts.length === 50 ? '+' : ''})
+                + Agregar todos ({addableProducts.length}{(productsData?.total ?? 0) > 50 ? '+' : ''})
               </button>
             )}
           </div>
