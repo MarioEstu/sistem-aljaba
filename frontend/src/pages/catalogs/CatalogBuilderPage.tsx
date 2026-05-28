@@ -15,7 +15,7 @@ import { useImages } from '@/hooks/useImages'
 import { useCategoriesFlat } from '@/hooks/useCategories'
 import { useCreatePdfJob } from '@/hooks/usePdfJobs'
 import type { CatalogProductEntry, Product, CatalogConfig } from '@/types'
-import { DEFAULT_CATALOG_CONFIG } from '@/types'
+import { DEFAULT_CATALOG_CONFIG, defaultPPP } from '@/types'
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -51,6 +51,7 @@ function ConfigPanel({
   const layouts  = ['grid4', 'grid6', 'grid9', 'list', 'sheet'] as const
   const formats  = ['A4-vertical', 'A4-horizontal', 'letter'] as const
   const toggle   = (key: keyof CatalogConfig) => onChange(key, !config[key])
+  const recommended = defaultPPP(config.layout)
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -77,11 +78,12 @@ function ConfigPanel({
         </div>
       </div>
       <div className="field">
-        <label>Productos por página</label>
+        <label>Productos por página <span style={{ fontWeight: 400, color: 'var(--fg-subtle)', fontSize: 'var(--fs-xs)' }}>(recomendado: {recommended})</span></label>
         <input
           type="number" min={1} max={50} className="input mono"
           value={config.productsPerPage}
-          onChange={(e) => onChange('productsPerPage', parseInt(e.target.value, 10) || 12)}
+          placeholder={String(recommended)}
+          onChange={(e) => onChange('productsPerPage', parseInt(e.target.value, 10) || recommended)}
         />
       </div>
       {(
@@ -314,7 +316,10 @@ export default function CatalogBuilderPage() {
 
   const handleConfigChange = async (key: keyof CatalogConfig, value: unknown) => {
     if (!catalog) return
-    const newConfig = { ...(catalog.config as CatalogConfig), [key]: value }
+    let newConfig = { ...(catalog.config as CatalogConfig), [key]: value }
+    if (key === 'layout') {
+      newConfig = { ...newConfig, productsPerPage: defaultPPP(value as string) }
+    }
     await updateCatalog.mutateAsync({ id: catalog.id, data: { config: newConfig as Record<string, unknown> } })
   }
 

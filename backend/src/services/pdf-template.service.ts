@@ -60,6 +60,14 @@ function gridRows(layout: string): number {
   return 0 // auto
 }
 
+function defaultPPP(layout: string): number {
+  if (layout === 'grid6') return 6
+  if (layout === 'grid9') return 9
+  if (layout === 'list')  return 15
+  if (layout === 'sheet') return 8
+  return 4  // grid4
+}
+
 // ──────────────────────────────────────────────
 // CSS
 // ──────────────────────────────────────────────
@@ -268,7 +276,7 @@ export function buildCatalogHtml(ctx: RenderContext, baseUrl?: string): string {
   const { catalog, entries, config: cfg } = ctx
   const paper = paperSize(cfg.format)
   const cols  = gridCols(cfg.layout)
-  const ppp   = cfg.productsPerPage || 12
+  const ppp   = cfg.productsPerPage || defaultPPP(cfg.layout)
   const pages = chunked(entries, ppp)
   const total = Math.max(1, pages.length)
 

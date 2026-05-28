@@ -97,10 +97,18 @@ export interface CatalogConfig {
   logoOnEachPage: boolean
 }
 
+export function defaultPPP(layout: string): number {
+  if (layout === 'grid6') return 6
+  if (layout === 'grid9') return 9
+  if (layout === 'list')  return 15
+  if (layout === 'sheet') return 8
+  return 4  // grid4
+}
+
 export const DEFAULT_CATALOG_CONFIG: CatalogConfig = {
   layout:          'grid4',
   format:          'A4-vertical',
-  productsPerPage: 12,
+  productsPerPage: 4,
   showCode:        true,
   showDescription: false,
   showPrice1:      true,
