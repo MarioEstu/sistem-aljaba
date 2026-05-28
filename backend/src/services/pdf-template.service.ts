@@ -78,14 +78,16 @@ function buildCss(paper: { width: string; height: string }, cols: number): strin
     }
     .page {
       width: ${paper.width};
-      min-height: ${paper.height};
+      height: ${paper.height};
+      overflow: hidden;
       padding: 14mm 14mm 18mm;
       page-break-after: always;
+      break-after: page;
       display: flex;
       flex-direction: column;
       position: relative;
     }
-    .page:last-child { page-break-after: avoid; }
+    .page:last-child { page-break-after: avoid; break-after: auto; }
 
     /* ── Header ── */
     .header {
@@ -116,6 +118,8 @@ function buildCss(paper: { width: string; height: string }, cols: number): strin
       overflow: hidden;
       display: flex;
       flex-direction: column;
+      page-break-inside: avoid;
+      break-inside: avoid;
     }
     .product-card.list-card {
       flex-direction: row;
