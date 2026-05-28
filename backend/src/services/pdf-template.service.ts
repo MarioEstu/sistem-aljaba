@@ -159,7 +159,7 @@ function buildCss(paper: { width: string; height: string }, cols: number, cfg: C
       grid-template-columns: repeat(${cols}, 1fr);
       gap: 4mm;
       flex: 1;
-      align-content: start;
+      align-content: stretch;
     }
 
     /* ── Product card ── */
@@ -222,13 +222,7 @@ function buildCss(paper: { width: string; height: string }, cols: number, cfg: C
     .product-info.list-info { padding: 0; }
     .product-name  { font-size: 9pt; font-weight: 700; line-height: 1.3; }
     .product-code  { font-size: 7.5pt; color: #888; font-family: monospace; }
-    .product-desc  {
-      font-size: 7.5pt; color: #555; line-height: 1.3;
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
+    .product-desc  { font-size: 7.5pt; color: #555; line-height: 1.3; }
     .product-price { font-size: 10pt; font-weight: 700; color: #1a1a18; margin-top: 1.5mm; }
     .product-prices-extra { font-size: 7pt; color: #888; line-height: 1.5; }
     .product-stock { font-size: 7.5pt; color: #555; }
