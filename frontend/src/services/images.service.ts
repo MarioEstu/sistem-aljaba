@@ -36,7 +36,7 @@ export const imagesService = {
     files: File[],
     onProgress?: (current: number, total: number) => void,
   ): Promise<{ uploaded: UploadImageResult[] }> => {
-    const CHUNK_SIZE = 50
+    const CHUNK_SIZE = 20
     const chunks: File[][] = []
     for (let i = 0; i < files.length; i += CHUNK_SIZE) {
       chunks.push(files.slice(i, i + CHUNK_SIZE))

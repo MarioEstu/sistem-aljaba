@@ -15,6 +15,10 @@ import settingsRoutes  from './routes/settings.routes'
 
 const app = express()
 
+// ---- Trust proxy (Nginx reverse proxy) ----
+// Necesario para que express-rate-limit lea X-Forwarded-For correctamente
+app.set('trust proxy', 1)
+
 // ---- Seguridad ----
 app.use(helmet())
 
@@ -43,9 +47,10 @@ app.use(rateLimit({
   max: 5000,
 }))
 
-// ---- Request timeout (30 s) — skip PDF jobs which run async and can take minutes ----
+// ---- Request timeout — skip PDF jobs (async, pueden tardar minutos) e image uploads (Sharp processing) ----
 app.use((req, res, next) => {
   if (req.path.startsWith('/api/pdf-jobs')) return next()
+  if (req.path.startsWith('/api/images/upload')) return next()
   res.setTimeout(30_000, () => {
     if (!res.headersSent) {
       res.status(503).json({ message: 'Tiempo de espera agotado. Intenta de nuevo.' })
