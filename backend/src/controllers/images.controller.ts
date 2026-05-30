@@ -4,10 +4,10 @@ import { imagesService } from '../services/images.service'
 
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 10 * 1024 * 1024, files: 20 },
+  limits: { fileSize: 10 * 1024 * 1024, files: 100 },
 })
 
-export const imagesUploadMiddleware = upload.array('files', 20)
+export const imagesUploadMiddleware = upload.array('files', 100)
 export const imageEditMiddleware = upload.single('file')
 
 export const imagesController = {

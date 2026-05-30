@@ -32,12 +32,30 @@ export const imagesService = {
   list: (params: ImagesQuery) =>
     http.get<PaginatedResponse<GalleryImage>>('/images', { params }).then((r) => r.data),
 
-  upload: (files: File[]) => {
-    const fd = new FormData()
-    files.forEach((file) => fd.append('files', file))
-    return http.post<{ uploaded: UploadImageResult[] }>('/images/upload', fd, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    }).then((r) => r.data)
+  upload: async (
+    files: File[],
+    onProgress?: (current: number, total: number) => void,
+  ): Promise<{ uploaded: UploadImageResult[] }> => {
+    const CHUNK_SIZE = 50
+    const chunks: File[][] = []
+    for (let i = 0; i < files.length; i += CHUNK_SIZE) {
+      chunks.push(files.slice(i, i + CHUNK_SIZE))
+    }
+
+    const allResults: UploadImageResult[] = []
+    for (let i = 0; i < chunks.length; i++) {
+      onProgress?.(i + 1, chunks.length)
+      const fd = new FormData()
+      chunks[i].forEach((file) => fd.append('files', file))
+      const result = await http
+        .post<{ uploaded: UploadImageResult[] }>('/images/upload', fd, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        })
+        .then((r) => r.data)
+      allResults.push(...result.uploaded)
+    }
+
+    return { uploaded: allResults }
   },
 
   overwrite: (id: string, file: File) => {

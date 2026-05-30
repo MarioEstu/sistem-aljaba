@@ -215,7 +215,7 @@ export default function ImagesPage() {
     page,
     limit: 24,
   })
-  const uploadMutation = useUploadImages()
+  const { uploadProgress, ...uploadMutation } = useUploadImages()
   const overwriteMutation = useOverwriteImage()
   const deleteMutation = useDeleteImage()
 
@@ -276,7 +276,11 @@ export default function ImagesPage() {
           />
           <button className="btn primary" onClick={() => fileInputRef.current?.click()} disabled={uploadMutation.isPending}>
             <Upload size={14} />
-            {uploadMutation.isPending ? 'Subiendo…' : 'Subir imágenes'}
+            {uploadProgress
+              ? `Lote ${uploadProgress.current} / ${uploadProgress.total}…`
+              : uploadMutation.isPending
+                ? 'Subiendo…'
+                : 'Subir imágenes'}
           </button>
         </div>
       </div>

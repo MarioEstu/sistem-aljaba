@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { imagesService, type ImagesQuery } from '@/services/images.service'
 
@@ -12,13 +13,22 @@ export function useImages(params: ImagesQuery) {
 
 export function useUploadImages() {
   const qc = useQueryClient()
-  return useMutation({
-    mutationFn: (files: File[]) => imagesService.upload(files),
+  const [uploadProgress, setUploadProgress] = useState<{ current: number; total: number } | null>(null)
+
+  const mutation = useMutation({
+    mutationFn: (files: File[]) =>
+      imagesService.upload(files, (current, total) => setUploadProgress({ current, total })),
     onSuccess: () => {
+      setUploadProgress(null)
       qc.invalidateQueries({ queryKey: [IMAGES_KEY] })
       qc.invalidateQueries({ queryKey: ['products'] })
     },
+    onError: () => {
+      setUploadProgress(null)
+    },
   })
+
+  return { ...mutation, uploadProgress }
 }
 
 export function useOverwriteImage() {
